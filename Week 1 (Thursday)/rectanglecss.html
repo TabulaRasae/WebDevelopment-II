@@ -37,7 +37,7 @@
         margin-top: 5px;
         margin-bottom: 5px;
       }
-      .error {
+      #error {
         display: inline-block;
         width: 100%;
         text-align: center;
@@ -49,27 +49,44 @@
     </style>
 
     <script defer>
+
+      let isNumber = function (num, nam) {
+        try {
+          let value = parseFloat(num);
+          if (isNaN(value)) {
+        error.style.display = "block";
+        error.innerHTML = `ERROR:" ${nam} Invalid Number`;
+        throw new Error("Invalid Number");
+          } else {
+        error.style.display = "none";
+        return num;
+          }
+        } catch (e) {
+          return false;
+        }
+      };
+
       let calcArea = function () {
-        let len = parseFloat(x.value);
-        let width = parseFloat(y.value);
+        let len = isNumber(x.value, "Lenght");
+        let width = isNumber(y.value, "Width");
 
         let area = len * width;
         z.value = area;
       };
 
       let calcPerimeter = function () {
-        let len = parseFloat(x.value);
-        let width = parseFloat(y.value);
+        let len = isNumber(x.value, "Lenght");
+        let width = isNumber(y.value, "Width");
 
-		let perimeter = 2 * len + 2 * width;
-		zp.value = perimeter;
+        let perimeter = 2 * len + 2 * width;
+        zp.value = perimeter;
       };
     </script>
   </head>
   <body>
     <form>
       <div class="title">RECTANGLE PROBLEM</div>
-      <div class="error">ERROR: Invalid Length Value</div>
+      <div id="error">ERROR: Invalid Length Value</div>
       <label>Length:</label> <input id="x" type="text" /> <br />
       <label>Width:</label> <input id="y" type="text" /> <br />
       <hr />
@@ -79,7 +96,11 @@
       <div style="text-align: center">
         <input type="button" value="Area" onclick="calcArea()" />
         <input type="button" value="Perimeter" onclick="calcPerimeter()" />
-        <input type="button" value="Both" onclick="calcArea();calcPerimeter()" />
+        <input
+          type="button"
+          value="Both"
+          onclick="calcArea();calcPerimeter()"
+        />
         <input type="reset" value="Clear" />
       </div>
     </form>
