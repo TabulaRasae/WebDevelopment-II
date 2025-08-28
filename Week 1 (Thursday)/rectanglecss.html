@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <!-- Course: 485 0900 [31715]
+    Developer: Mark Fartushniak -->
+
     <title>RECTANGLE PROBLEM</title>
     <style>
       form {
@@ -49,17 +52,16 @@
     </style>
 
     <script defer>
-
       let isNumber = function (num, nam) {
         try {
           let value = parseFloat(num);
           if (isNaN(value)) {
-        error.style.display = "block";
-        error.innerHTML = `ERROR:" ${nam} Invalid Number`;
-        throw new Error("Invalid Number");
+            error.style.display = "block";
+            error.innerHTML = `ERROR:" ${nam} Invalid Number`;
+            throw new Error("Invalid Number");
           } else {
-        error.style.display = "none";
-        return num;
+            error.style.display = "none";
+            return num;
           }
         } catch (e) {
           return false;
