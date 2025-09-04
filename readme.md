@@ -14,4 +14,4 @@
 - **Room**: Fiterman 905  
 
 ## Instructor  
-- **Name**: Jose Vargas s
+- **Name**: Jose Vargas
