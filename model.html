@@ -1,0 +1,62 @@
+<html>
+
+<head>
+    <title>CIS388 Project</title>
+    <style>
+        .modal-look {
+            position: fixed;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            top: 0;
+            display: none;
+        }
+
+        #modal-content {
+            width: 200px;
+            margin: auto;
+            margin-top: 37vh;
+            background: white;
+            border-radius: 10px;
+            padding: 10 px;
+            text-align: center;
+            display: none;
+        }
+    </style>
+
+    <script>
+        function displayModal(item) {
+            document.getElementById("modal").style.display = "block";
+            document.getElementById("item-added").innerHTML =
+                "<div style='font-size: 12px'> " + namex + "Added to We Cardt</div>";
+
+            document.getElementById("modal-content").style.display = "block";
+        }
+
+        function closeModal() {
+            document.getElementById("modal").style.display = "none";
+        }
+    </script>
+</head>
+
+<body>
+    <div id="content" class="contentSection">
+        <h2> Products List </h2>
+
+        ITEM1: <img src="img/lgtv.jpg" alt="item1" width="200" height="200">
+        <input type="button" onclick="displayModal('LG HDTV')" ; value="Add to Cart"> <br>
+
+        ITEM2: <img src="img/sonytv.jpg" alt="item2" width="200" height="200">
+        <input type="button" onclick="displayModal('SONY HDTV')" ; value="Add to Cart"> <br>
+
+    </div>
+
+    <div class="modal-look" id="modal">
+        <div class="" id="modal-content">
+            <h3 id="item-added" style="color:black"></h3>
+            <button type="button" name="button" onclick="closeModal()">Okay</button>
+        </div>
+    </div>
+</body>
+
+</html>
