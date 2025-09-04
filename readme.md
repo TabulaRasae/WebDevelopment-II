@@ -1,5 +1,4 @@
 ## CIS 485: Web Programming II  
-
 ## Student: Mark Fartushniak 
 
 ## Course Information  
