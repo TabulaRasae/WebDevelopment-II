@@ -1,9 +1,7 @@
 ## CIS 485: Web Programming II  
 
 ## Course Information  
-- **Status**: Enrolled  
 - **Units**: 3.00  
-- **Grading Basis**: Letter Grades  
 - **Academic Program**: Undergraduate  
 - **Requirement Designation**: Regular Non-Liberal Arts  
 
