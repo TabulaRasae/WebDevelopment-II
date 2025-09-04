@@ -28,7 +28,7 @@
         function displayModal(item) {
             document.getElementById("modal").style.display = "block";
             document.getElementById("item-added").innerHTML =
-                "<div style='font-size: 12px'> " + namex + "Added to We Cardt</div>";
+                `<div style="font-size: 12px"> ${item} Added to We Cart</div>`;
 
             document.getElementById("modal-content").style.display = "block";
         }
@@ -43,10 +43,10 @@
     <div id="content" class="contentSection">
         <h2> Products List </h2>
 
-        ITEM1: <img src="img/lgtv.jpg" alt="item1" width="200" height="200">
+        ITEM1: <img src="img/lgtv.jpg" alt="item1" width="300" height="300">
         <input type="button" onclick="displayModal('LG HDTV')" ; value="Add to Cart"> <br>
 
-        ITEM2: <img src="img/sonytv.jpg" alt="item2" width="200" height="200">
+        ITEM2: <img src="img/sonytv.jpg" alt="item2" width="300" height="300">
         <input type="button" onclick="displayModal('SONY HDTV')" ; value="Add to Cart"> <br>
 
     </div>
