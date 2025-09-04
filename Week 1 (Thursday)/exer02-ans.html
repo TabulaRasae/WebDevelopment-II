@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>
+        EXER06 ANSWERs
+    </title>
+</head>
+
+<body>
+
+    <script>
+
+        let doCalc = function () {
+            let x = parseFloat(num.value)
+            let y = x+1;
+            ans.value = y;
+        }
+
+        let x = document.createElement("FORM");  //CREATE FORM ELEMENT    #1
+        document.body.appendChild(x);          //ADD FORM TO THE BODY   #9
+        //-------------------------------------------------------------------
+        let label01 = document.createElement("LABEL");//CREATE LABEL       #2
+        label01.innerHTML = "ENTER INTEGER:";          //ADD LABEL CONTENT #2
+        label01.setAttribute("style", "color:green"); //Make label green  #3 
+        x.appendChild(label01);                     //ADD LABEL TO FORM  #2
+
+        let textbox01 = document.createElement("INPUT"); //CREATE TEXBOX   #4
+        textbox01.setAttribute("type", "text");         //                #4
+        textbox01.setAttribute("id", "num");         //GIVE IT AN ID    
+        x.appendChild(textbox01);                      //ADD TO FORM     #4
+        //------------------------------------------------------------------
+        let br = document.createElement("BR");           //ADD END-OF-LINE BREAK
+        x.appendChild(br);
+        //-------------------------------------------------------------------
+        let label02 = document.createElement("LABEL");//CREATE LABEL       #5
+        label02.innerHTML = "ANSWER IS:";          //ADD LABEL CONTENT #2
+        label02.setAttribute("style", "color:green"); //Make label green  #6 
+        x.appendChild(label02);                     //ADD LABEL TO FORM  #5
+
+        let textbox02 = document.createElement("INPUT"); //CREATE TEXBOX   #7
+        textbox02.setAttribute("type", "text");         //                #7
+        textbox02.setAttribute("id", "ans");         //GIVE IT AN ID
+        x.appendChild(textbox02);                      //ADD TO FORM     #7
+        //------------------------------------------------------------------   
+        let br2 = document.createElement("BR");           //ADD END-OF-LINE BREAK
+        x.appendChild(br2);
+        //------------------------------------------------------------------- 
+        //CREATE 1st BUTTON
+        //------------------------------------------------------------------
+        let b1 = document.createElement("input");     //CREATE BUTTON      #8
+        b1.setAttribute("type", "button");           //                   #8
+        b1.setAttribute("value", "COMPUTE");         //ADD TEXT TO BUTTON #8
+        b1.setAttribute("onclick", "doCalc()");     //ADD FUNCTION TO BUTTON #8
+        x.appendChild(b1);
+        //------------------------------------------------------------------    
+        //CREATE 2nD BUTTON
+        //------------------------------------------------------------------
+        let b2 = document.createElement("input");     //CREATE BUTTON      #8
+        b2.setAttribute("type", "reset");           //                   #8
+        b2.setAttribute("value", "CLEAR");         //ADD TEXT TO BUTTON   #8
+        x.appendChild(b2);
+        //------------------------------------------------------------------
+
+
+
+
+    </script>
+</body>
+
+</html>
