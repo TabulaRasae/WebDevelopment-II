@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head> 
+<script>
+function calcsum()
+{
+	var xhr = new XMLHttpRequest();
+
+	xhr.onreadystatechange = function()
+	{
+		if(xhr.readyState === 4)//Process Server Response
+		{
+                  document.getElementById("ans").value=xhr.responseText;
+		}
+	};
+    xhr.open("POST","sum2.js", true);
+	xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+	let data="num1="+num1.value+"&num2="+num2.value;
+    xhr.send(data); 
+}
+</script>
+</head>
+<body>
+<form>
+    Number1: <input type="text" id="num1" /><br />
+    Number2: <input type="text" id="num2" /><br />
+    Answer: <input type="text" id="ans" /><br />
+    <input type='button' value='Enter' onclick="calcsum();" />
+    <input type='reset' value='Clear' />
+</form>
+</body>
+</html>

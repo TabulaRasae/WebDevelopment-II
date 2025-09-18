@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head> 
+<script>
+function calcsumdiff()
+{
+	var xhr = new XMLHttpRequest();
+ 
+	xhr.onreadystatechange = function()
+	{
+		if(xhr.readyState === 4)
+		{
+            const {sum,diff}=JSON.parse(xhr.responseText);
+			document.getElementById("ans1").value=sum;
+			document.getElementById("ans2").value=diff;
+		}
+	};
+	xhr.open("POST", "sumdiff", true);
+	xhr.setRequestHeader("Content-type", "application/json");
+	let num1=input1.value;
+	let num2=input2.value;
+    xhr.send(JSON.stringify({num1,num2})); 
+}
+</script>
+</head>
+<body>
+<form>
+    Number1: <input type="text" id="input1" /><br />
+    Number2: <input type="text" id="input2" /><br />
+    Sum: <input type="text" id="ans1" /><br /> 
+    Difference: <input type="text" id="ans2" /><br />
+    <input type='button' value='Enter' onclick="calcsumdiff();" />
+    <input type='reset' value='Clear' />
+</form>
+</body>
+</html>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head> 
+<script  type="text/javascript">
+function displayHello()
+{
+	var xhr = new XMLHttpRequest();
+ 
+	xhr.onreadystatechange = function()
+	{
+		if(xhr.readyState === 4)//Process Server Response
+		{
+			var value=xhr.responseText;
+			alert(value);
+		}
+	};
+      //Send Request 
+      xhr.open("GET", "hello.js", true);
+      xhr.send(null); 
+}
+</script>
+</head>
+<body>
+<form><input type='button' value='Enter Here' onclick="displayHello();" /></form>
+</body>
+</html>
