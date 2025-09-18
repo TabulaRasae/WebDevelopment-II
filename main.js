@@ -10,14 +10,30 @@ app.use((req, res, next) =>
   next();
 });
 
-app.get ("/sum.js", function (req,res)
+app.get ("/area", (req,res) =>
 {
-  let ans=parseFloat(req.query.num1)+parseFloat(req.query.num2);
-  ans=""+ans;
+  let ans=parseFloat(req.query.length)*parseFloat(req.query.width);
+  area=""+ans;
   res.status(200);
-  res.send(ans); 	
+  res.send(area); 	
 } );
 
-app.listen(3000 , function () {
-	console.log ("server is listening!!!");
+app.get ("/perimeter", (req,res) =>
+{
+  let ans=(parseFloat(req.query.length)*2)+(parseFloat(req.query.width)*2);
+  perimeter=""+ans;
+  res.status(200);
+  res.send(perimeter); 	
+} );
+
+app.get ("/both", (req,res) => {
+    let area = parseFloat(req.query.length)*parseFloat(req.query.width);
+    let perimeter =(parseFloat(req.query.length)*2)+(parseFloat(req.query.width)*2);
+    res.status(200);
+    res.send(`${area} ${perimeter}`)
+})
+
+
+app.listen(3000 ,  () => {
+	console.log ("server is running on http://localhost:3000");
 } );

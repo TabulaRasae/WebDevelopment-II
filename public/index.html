@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>RECTANGLE PROBLEM</title>
+    <style>
+      input[type="text"] {
+        background-color: #dedee6;
+        border: 4px solid black;
+        margin: 2px;
+      }
+      input[type="button"],
+      input[type="reset"] {
+        color: white;
+        background-color: black;
+        border: 1px solid white;
+        margin: 2px;
+      }
+    </style>
+    <script defer>
+      function calcArea() {
+        const length = document.getElementById("length").value;
+        const width = document.getElementById("width").value;
+
+        if (length === "" || width === "") {
+          alert("Please enter both length and width.");
+          return;
+        }
+
+        var xhr = new XMLHttpRequest();
+
+        xhr.onreadystatechange = () => {
+          if (xhr.readyState === 4) {
+            document.getElementById("area").value = xhr.responseText;
+          }
+        };
+        var url = "area?length=" + length + "&width=" + width;
+        xhr.open("GET", url, true);
+        xhr.send(null);
+      }
+
+      function calcPerimeter() {
+        const length = document.getElementById("length").value;
+        const width = document.getElementById("width").value;
+
+        if (length === "" || width === "") {
+          alert("Please enter both length and width.");
+          return;
+        }
+
+        var xhr = new XMLHttpRequest();
+
+        xhr.onreadystatechange = () => {
+          if (xhr.readyState === 4) {
+            document.getElementById("perimeter").value = xhr.responseText;
+          }
+        };
+        var url = "perimeter?length=" + length + "&width=" + width;
+        xhr.open("GET", url, true);
+        xhr.send(null);
+      }
+
+      function calcBoth() {
+        const length = document.getElementById("length").value;
+        const width = document.getElementById("width").value;
+
+        if (length === "" || width === "") {
+          alert("Please enter both length and width.");
+          return;
+        }
+
+        var xhr = new XMLHttpRequest();
+
+        xhr.onreadystatechange = () => {
+          if (xhr.readyState === 4) {
+            document.getElementById("area").value = xhr.responseText.split(" ")[0];
+            document.getElementById("perimeter").value = xhr.responseText.split(" ")[1];
+
+          }
+        };
+        var url = "both?length=" + length + "&width=" + width;
+        xhr.open("GET", url, true);
+        xhr.send(null);
+      }
+    </script>
+  </head>
+  <body>
+    <form style="color: white">
+      <div
+        style="
+          background-color: blue;
+          border: solid black 7px;
+          border-radius: 25px;
+          width: 400px;
+        "
+      >
+        <div
+          style="
+            color: white;
+            background-color: black;
+            border: solid black 2px;
+            margin-bottom: 2px;
+            text-align: center;
+          "
+        >
+          RECTANGLE PROBLEM
+        </div>
+        <div style="width: 150px; float: left">
+          <label>Enter Length:</label>
+        </div>
+        <div><input type="text" id="length" /></div>
+        <div style="width: 150px; float: left"><label>Enter Width:</label></div>
+        <div><input type="text" id="width" /></div>
+        <hr />
+        <div style="width: 150px; float: left"><label>Area:</label></div>
+        <div><input type="text" id="area" /></div>
+        <div style="width: 150px; float: left"><label>Perimeter:</label></div>
+        <div><input type="text" id="perimeter" /></div>
+        <hr />
+        <div>
+          <center>
+            <input type="button" value="AREA" onclick="calcArea();" />
+            <input type="button" value="PERIMETER" onclick="calcPerimeter();" />
+            <input type="button" value="BOTH" onclick="calcBoth();" />
+            <input type="reset" value="CLEAR" />
+          </center>
+        </div>
+      </div>
+    </form>
+  </body>
+</html>
