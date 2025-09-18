@@ -16,6 +16,22 @@
         margin: 2px;
       }
     </style>
+
+    <script defer>
+      function calcsum() {
+        var xhr = new XMLHttpRequest();
+
+        xhr.onreadystatechange = function () {
+          if (xhr.readyState === 4) {
+            //Process Server Response
+            document.getElementById("ans").value = xhr.responseText;
+          }
+        };
+        var url = "sum.js?num1=" + num1.value + "&num2=" + num2.value;
+        xhr.open("GET", url, true);
+        xhr.send(null);
+      }
+    </script>
   </head>
   <body>
     <form style="color: white">
