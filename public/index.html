@@ -33,7 +33,7 @@
             document.getElementById("area").value = xhr.responseText;
           }
         };
-        var url = "area?length=" + length + "&width=" + width;
+        var url = `area?length=${length}&width=${width}`;
         xhr.open("GET", url, true);
         xhr.send(null);
       }
