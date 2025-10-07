@@ -2,6 +2,63 @@
 <html>
   <head>
     <title>AGE PROBLEM</title>
+    <script defer>
+      const ageInMonthsOnly = () => {
+        let xhr = new XMLHttpRequest();
+
+        xhr.onreadystatechange = () => {
+          if (xhr.readyState === 4) {
+            document.getElementById("monthsOnly").value = xhr.responseText;
+          }
+        };
+
+        xhr.open("POST", "ageInMonthsOnly", true);
+        xhr.setRequestHeader(
+          "Content-type",
+          "application/x-www-form-urlencoded"
+        );
+        let data = `birthYear=${birthY}&birthMonth=${birthM}&currentYear=${currentY}&currentMonth=${currentM}`;
+        xhr.send(data);
+      };
+
+      const ageInYearsOnly = () => {
+        let xhr = new XMLHttpRequest();
+
+        xhr.onreadystatechange = () => {
+          if (xhr.readyState === 4) {
+            document.getElementById("monthsAndYearsY").value = xhr.responseText.split(" ")[0];
+            document.getElementById("monthsAndYearsM").value = xhr.responseText.split(" ")[1];
+
+          }
+        };
+
+        xhr.open("POST", "ageInMonthsOnly", true);
+        xhr.setRequestHeader(
+          "Content-type",
+          "application/x-www-form-urlencoded"
+        );
+        let data = `birthYear=${birthY}&birthMonth=${birthM}&currentYear=${currentY}&currentMonth=${currentM}`;
+        xhr.send(data);
+      };
+
+      const ageInYearsAndMonths = () => {
+        let xhr = new XMLHttpRequest();
+
+        xhr.onreadystatechange = () => {
+          if (xhr.readyState === 4) {
+            document.getElementById("monthsOnly").value = xhr.responseText;
+          }
+        };
+
+        xhr.open("POST", "ageInMonthsOnly", true);
+        xhr.setRequestHeader(
+          "Content-type",
+          "application/x-www-form-urlencoded"
+        );
+        let data = `birthYear=${birthY}&birthMonth=${birthM}&currentYear=${currentY}&currentMonth=${currentM}`;
+        xhr.send(data);
+      };
+    </script>
   </head>
   <body style="font-family: 'Courier New', Courier, monospace; padding: 5px">
     <form style="color: white; padding: 5px; font: 1.5em monospace">
@@ -43,6 +100,7 @@
               width: 150px;
             "
             type="text"
+            id="birthY"
           />
         </div>
         <div style="width: 200px; float: left">
@@ -62,6 +120,7 @@
               width: 150px;
             "
             type="text"
+            id="birthM"
           />
         </div>
         <div style="width: 200px; float: left">
@@ -81,6 +140,7 @@
               width: 150px;
             "
             type="text"
+            id="currentY"
           />
         </div>
         <div style="width: 200px; float: left">
@@ -100,6 +160,7 @@
               width: 150px;
             "
             type="text"
+            id="currentM"
           />
         </div>
         <hr />
@@ -117,6 +178,7 @@
             "
             type="text"
             readonly
+            id="monthsOnly"
           />
         </div>
         <hr />
@@ -134,6 +196,7 @@
             "
             type="text"
             readonly
+            id="yearsOnly"
           />
         </div>
         <hr />
@@ -151,6 +214,7 @@
             "
             type="text"
             readonly
+            id="monthsAndYearsY"
           />
           Months:<input
             style="
@@ -162,6 +226,7 @@
             "
             type="text"
             readonly
+            id="monthsAndYearsM"
           />
         </div>
         <p style="both: clear"></p>
