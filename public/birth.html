@@ -4,14 +4,16 @@
     <title>AGE PROBLEM</title>
     <script defer>
       const ageInMonthsOnly = () => {
+        let birthY = document.getElementById("birthY").value;
+        let birthM = document.getElementById("birthM").value;
+        let currentY = document.getElementById("currentY").value;
+        let currentM = document.getElementById("currentM").value;
         let xhr = new XMLHttpRequest();
-
         xhr.onreadystatechange = () => {
           if (xhr.readyState === 4) {
             document.getElementById("monthsOnly").value = xhr.responseText;
           }
         };
-
         xhr.open("POST", "ageInMonthsOnly", true);
         xhr.setRequestHeader(
           "Content-type",
@@ -22,17 +24,17 @@
       };
 
       const ageInYearsOnly = () => {
+        let birthY = document.getElementById("birthY").value;
+        let birthM = document.getElementById("birthM").value;
+        let currentY = document.getElementById("currentY").value;
+        let currentM = document.getElementById("currentM").value;
         let xhr = new XMLHttpRequest();
-
         xhr.onreadystatechange = () => {
           if (xhr.readyState === 4) {
-            document.getElementById("monthsAndYearsY").value = xhr.responseText.split(" ")[0];
-            document.getElementById("monthsAndYearsM").value = xhr.responseText.split(" ")[1];
-
+            document.getElementById("yearsOnly").value = xhr.responseText;
           }
         };
-
-        xhr.open("POST", "ageInMonthsOnly", true);
+        xhr.open("POST", "ageInYearsOnly", true);
         xhr.setRequestHeader(
           "Content-type",
           "application/x-www-form-urlencoded"
@@ -42,15 +44,20 @@
       };
 
       const ageInYearsAndMonths = () => {
+        let birthY = document.getElementById("birthY").value;
+        let birthM = document.getElementById("birthM").value;
+        let currentY = document.getElementById("currentY").value;
+        let currentM = document.getElementById("currentM").value;
         let xhr = new XMLHttpRequest();
-
         xhr.onreadystatechange = () => {
           if (xhr.readyState === 4) {
-            document.getElementById("monthsOnly").value = xhr.responseText;
+            document.getElementById("monthsAndYearsY").value =
+              xhr.responseText.split(" ")[0];
+            document.getElementById("monthsAndYearsM").value =
+              xhr.responseText.split(" ")[1];
           }
         };
-
-        xhr.open("POST", "ageInMonthsOnly", true);
+        xhr.open("POST", "ageInYearsAndMonths", true);
         xhr.setRequestHeader(
           "Content-type",
           "application/x-www-form-urlencoded"
@@ -246,6 +253,7 @@
               "
               type="button"
               value="AGE-IN-MONTHS-ONLY"
+              onclick="ageInMonthsOnly()"
             />
             <input
               style="
@@ -259,6 +267,7 @@
               "
               type="button"
               value="AGE-IN-YEARS-ONLY"
+              onclick="ageInYearsOnly()"
             />
             <input
               style="
@@ -272,6 +281,7 @@
               "
               type="button"
               value="AGE-IN-YEARS-AND-MONTHS"
+              onclick="ageInYearsAndMonths()"
             />
             <input
               style="
@@ -286,6 +296,7 @@
               "
               type="button"
               value="AGE-IN-ALL-FORMATS"
+              onclick="ageInMonthsOnly();ageInYearsOnly();ageInYearsAndMonths()"
             />
             <input
               style="
