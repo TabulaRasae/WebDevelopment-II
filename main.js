@@ -57,5 +57,5 @@ app.post("/ageInYearsAndMonths", (req, res) => {
 });
 
 app.listen(3000, () => {
-  console.log("server is started at the port 3000");
+  console.log("server started at the port 3000");
 });
