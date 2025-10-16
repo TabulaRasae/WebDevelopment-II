@@ -25,7 +25,7 @@ app.get("/fallGrade", (req, res) => {
 app.get("/springGrade", (req, res) => {
   const midterm = parseFloat(req.query.midterm);
   const final = parseFloat(req.query.final);
-  const grade = midterm * 0.5 + final * 0.5;
+  const grade = (midterm +final*2)/3;
   const letter = getLetterGrade(grade);
   res.json({ grade: grade.toFixed(2), letter: letter });
 });
@@ -33,7 +33,7 @@ app.get("/springGrade", (req, res) => {
 app.get("/summerGrade", (req, res) => {
   const midterm = parseFloat(req.query.midterm);
   const final = parseFloat(req.query.final);
-  const grade = midterm * 0.3 + final * 0.7;
+  const grade = (midterm + final)/2;
   const letter = getLetterGrade(grade);
   res.json({ grade: grade.toFixed(2), letter: letter });
 });
