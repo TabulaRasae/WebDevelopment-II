@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head> 
+<script>
+function calcsumdiff()
+{
+	const requestOptions = 
+	{
+    		method: 'POST',
+    		headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+    		body: `num1=${num1.value}&num2=${num2.value}`
+	};
+
+	fetch('sumdiff', requestOptions)
+    	.then(response => response.json())
+    	.then(data => 
+		{
+			ans1.value=data.sum;
+			ans2.value=data.diff;
+		});
+}
+</script>
+</head>
+<body>
+<form>
+    Number1: <input type="text" id="num1" /><br />
+    Number2: <input type="text" id="num2" /><br />
+    Sum: <input type="text" id="ans1" /><br />
+	Difference: <input type="text" id="ans2" /><br />
+    <input type='button' value='Enter' onclick="calcsumdiff();" />
+    <input type='reset' value='Clear' />
+</form>
+</body>
+</html>

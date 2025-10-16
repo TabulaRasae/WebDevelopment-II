@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head> 
+<script>
+async function calcSumDiff() 
+{
+		const requestOptions = 
+		{
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({num1: `${num1.value}`, num2: `${num2.value}`})
+		};
+		const response = await fetch('sumdiff', requestOptions);
+		const data = await response.json();
+		ans1.value=data.sum;
+		ans2.value=data.diff;
+}
+</script>
+</head>
+<body>
+<form>
+    Number1: <input type="text" id="num1" /><br />
+    Number2: <input type="text" id="num2" /><br />
+    Sum: <input type="text" id="ans1" /><br />
+	Difference: <input type="text" id="ans2" /><br />
+    <input type='button' value='Enter' onclick="calcSumDiff();" />
+    <input type='reset' value='Clear' />
+</form>
+</body>
+</html>

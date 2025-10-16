@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head><title>GRADE PROBLEM</title>
+<style>
+form{color:white;padding:5px;font:1.5em monospace;}
+.main{background-color:red;border:solid black 7px; border-radius: 25px;width:520px;}
+.title{color:white;background-color:black;border:solid black 2px;text-align:center;outline:1px black solid}
+.divw{width:200px;float:left}
+input[type="reset"],input[type="button"],body{font-family:"Courier New", Courier, monospace;padding:5px;}
+input[type="text"]{background-color:yellow;font:1em monospace;border:4px solid black;margin:2px;width:150px}
+input[type="button"],input[type="reset"]{color:white;background-color:black;border:1px solid white;margin:2px;font: 1em monospace}
+label{color:white;font-weight: bold;padding-left:5px}
+#fallletter,#springletter,#summerletter{width:30px}
+#error{color:white;background-color:green; margin-bottom:2px;text-align:center;display:none}
+</style>
+</head>
+<body>
+<form>
+<div class="main">
+<div class="title"><strong>GRADE PROBLEM</strong></div>
+<div id="error"><strong>ERROR</strong></div>
+<div class="divw"> <label> Enter Exam1:</label> </div>	<div> 	<input type="text"> </div>
+<div class="divw"> <label> Enter Exam2:</label>   </div>   <div> 	<input  type="text"/> </div> 
+<hr> 
+<div class="divw"> <label> Fall Grade:</label>   </div>   <div> <input type="text" readonly id="fall"/> <input type="text" id="fallletter" readonly /> </div> 
+<div class="divw"> <label> Spring Grade:</label>   </div>   <div> <input type="text" readonly id="spring" /> <input type="text"  id="springletter" readonly /></div> 
+<div class="divw"> <label> Summer Grade:</label>   </div>   <div> <input type="text" readonly id="summer" /> <input type="text"  id="summerletter" readonly /> </div> 
+<hr> 
+<div style="text-align: center;">
+	<input type="button" value="FallGrade" />
+	<input type="button" value="SpringGrade" />
+	<input type="button" value="SummerGrade" />
+	<input type="button" value="AllThree" />
+	<input type="button" value="Clear" 						/>
+
+</div> 
+</div>
+</form>
+</body>
+</html>
