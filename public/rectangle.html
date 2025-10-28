@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head><title>Rectangle</title>
+<style>
+.p2 table{
+	background:red;
+	border-bottom-left-radius:25px;
+	border-bottom-right-radius:25px;
+	color:white;
+}
+.p2 th{background:black;}
+.p2 input[type="text"]  {border:solid 3px black;background:#CCCCCC;width:300px;}
+.p2 input[type="button"]{border:solid white 1px;background:black;color:white;}
+.p2 .center{text-align:center;}
+</style>
+</head>
+<body>
+	
+<form class="p2" method="post" action="rectangle.js">
+<table>
+<tr><th colspan="2">RECTANGLE PROBLEM</th></tr>
+<tr><td>Enter Length:</td><td> <input type="text" name="num1"/> </td></tr>
+<tr><td>Enter Width: </td><td> <input type="text" name="num2"/> </td></tr>
+<tr><td colspan="2"><hr></td></tr>
+<tr>
+	<td colspan="2" class="center" >
+		<input type="submit" name="choice" value="Area" />
+		<input type="submit" name="choice" value="Perimeter" />
+		<input type="submit" name="choice" value="Both" />
+		<input type="reset" value="Clear" />
+	</td>
+</tr>
+</table>
+</form>
+
+</body>
+</html>
