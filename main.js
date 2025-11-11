@@ -12,10 +12,10 @@ app.use(
   })
 );
 
-app.post("/rectangle.js", (req, res) => {
-  let choice = req.body.choice;
-  let len = req.body.num1;
-  let wid = req.body.num2;
+app.get("/rectangle.js", (req, res) => {
+  let choice = req.query.choice;
+  let len = req.query.num1;
+  let wid = req.query.num2;
   let area = parseFloat(len)*parseFloat(wid);
   let perimeter = parseFloat(len)*2+parseFloat(wid)*2;
   let output = '<br><a href="rectangle.html">Go back to rectangle</a>';
