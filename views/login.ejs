@@ -8,6 +8,21 @@
 <link href="styles.css" rel="stylesheet" type="text/css" />
 <link rel="stylesheet" href="nivo-slider.css" type="text/css" media="screen" />
 <style>
+  .message-banner {
+    margin: 10px 0;
+    padding: 10px;
+    border: 2px solid #3B3B3B;
+    background-color: #e6ffe6;
+    color: #033;
+    font-weight: bold;
+  }
+  .message-banner.error {
+    background-color: #ffe6e6;
+    border-color: #c44;
+    color: #600;
+  }
+</style>
+<style>
     .title
     {
         color:white;
@@ -105,10 +120,11 @@
 <!-- header begins -->
 <div id="header">
 	<div id="buttons">
-      <a href="login.html" class="but"  title="">Login</a><div class="but_razd"></div>
-      <a href="products.html" class="but" title="">Products</a><div class="but_razd"></div>
-      <a href="about.html"  class="but" title="">About us</a><div class="but_razd"></div>
-      <a href="contact.html" class="but" title="">Contact us</a>
+      <a href="/" class="but"  title="">Home</a><div class="but_razd"></div>
+      <a href="/products" class="but" title="">Products</a><div class="but_razd"></div>
+      <a href="/about" class="but" title="">About us</a><div class="but_razd"></div>
+      <a href="/login" class="but" title="">Login</a><div class="but_razd"></div>
+      <a href="/register" class="but" title="">Register</a>
     </div>
 	<div id="logo">
     	<b><a href="#">BMCC ELECTRONICS</a></b>
@@ -144,12 +160,15 @@
                     <div class="hh1">LOGIN</div>
                     <p>&nbsp;</p>
                     <!-- -------------------------------------------------  -->
-                <form action="#" method="post" style="font-size: 1.5em;">
+                <% if (typeof message !== 'undefined' && message && message.length) { %>
+                  <div class="message-banner <%= isError ? 'error' : '' %>"><%= message %></div>
+                <% } %>
+                <form action="/login" method="post" style="font-size: 1.5em;">
                 <div class="form_settings">
-                <p><span>Username:</span><input class="contact" type="text" name="your_name" /></p>
-                <p><span>Password:</span><input class="contact" type="password" name="your_email" value="" /></p>
-                <p style="padding-top: 15px"><span>&nbsp;</span><input class="submit" type="submit" name="contact_submitted" value="submit" />
-                  <br><span>&nbsp;</span><a style="margin-left:20px" href="register.html">Register</a>
+                <p><span>Username:</span><input class="contact" type="text" name="userid" required /></p>
+                <p><span>Password:</span><input class="contact" type="password" name="password" required /></p>
+                <p style="padding-top: 15px"><span>&nbsp;</span><input class="submit" type="submit" value="Login" />
+                  <br><span>&nbsp;</span><a style="margin-left:20px" href="/register">Register</a>
                 </p>
                 </div>
                 </form>

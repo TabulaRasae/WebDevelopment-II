@@ -1,50 +1,118 @@
-const express = require ('express'); 
-const app = express(); 
-app.set('view engine', 'ejs');
-app.use(express.static("public"));
-var mongoose = require("mongoose");
-mongoose.Promise = global.Promise;
-mongoose.connect("mongodb://localhost:27017/cis485",{useUnifiedTopology: true,useNewUrlParser: true });
+const express = require("express");
+const path = require("path");
+const mongoose = require("mongoose");
 
-var loginSchema = new mongoose.Schema({
-    userid: String,
-    password: String
+const app = express();
+
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
+
+app.use(express.static("public"));
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
+mongoose.Promise = global.Promise;
+mongoose.connect("mongodb://localhost:27017/cis485", {
+    useUnifiedTopology: true,
+    useNewUrlParser: true,
 });
 
-var User = mongoose.model("login", loginSchema);
+const loginSchema = new mongoose.Schema({
+    userid: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+});
+
+const User = mongoose.model("login", loginSchema);
+
+const renderWithMessage = (res, view, message, isError = false) => {
+    res.render(view, { message, isError });
+};
 
 app.use((req, res, next) => {
-  console.log(`request made to: ${req.url}`);
-  next();
+    console.log(`request made to: ${req.method} ${req.url}`);
+    next();
 });
 
-app.get ("/", function (req,res) 
-{
-	res.render ( "register.ejs",{message:""});	
-} );
+app.get("/", (req, res) => {
+    res.render("index");
+});
 
-app.get("/register", (req, res) =>
+app.get("/register", (req, res) => {
+    renderWithMessage(res, "register", "");
+});
 
-{
-    User.findOne({userid:req.query.userid}, '', function (err, data)
-    {
-        if (err) return handleError(err);
-        if (data==null)
-        {       
-                var x = new User(req.query);
-                x.save(function (err)
-                { 
-                    if (err) return handleError(err);
-                    res.render ( "register",{message: 'Registration Succelfull'});
-                });
+app.post("/register", async (req, res) => {
+    try {
+        const { userid, password, confirmPassword } = req.body;
+        if (!userid || !password || !confirmPassword) {
+            return renderWithMessage(res, "register", "All fields are required.", true);
         }
-        else
-        {
-            res.render ( "register",{message: 'ERROR: User Already In Database'});
+
+        if (password !== confirmPassword) {
+            return renderWithMessage(res, "register", "Passwords do not match.", true);
         }
+
+        const existingUser = await User.findOne({ userid }).exec();
+        if (existingUser) {
+            return renderWithMessage(res, "register", "ERROR: User already exists.", true);
+        }
+
+        const user = new User({ userid, password });
+        await user.save();
+
+        renderWithMessage(res, "register", "Registration successful!", false);
+    } catch (error) {
+        console.error("Registration failed", error);
+        renderWithMessage(res, "register", "Server error. Please try again.", true);
+    }
+});
+
+app.get("/login", (req, res) => {
+    renderWithMessage(res, "login", "");
+});
+
+app.post("/login", async (req, res) => {
+    try {
+        const { userid, password } = req.body;
+        if (!userid || !password) {
+            return renderWithMessage(res, "login", "Both fields are required.", true);
+        }
+
+        const user = await User.findOne({ userid, password }).exec();
+        if (!user) {
+            return renderWithMessage(res, "login", "Invalid username or password.", true);
+        }
+
+        renderWithMessage(res, "login", "Login successful!", false);
+    } catch (error) {
+        console.error("Login failed", error);
+        renderWithMessage(res, "login", "Server error. Please try again.", true);
+    }
+});
+
+const staticViews = [
+    "about",
+    "products",
+    "single",
+    "sony",
+    "samsung",
+    "panasonic",
+];
+
+staticViews.forEach((viewName) => {
+    app.get(`/${viewName}`, (req, res) => {
+        res.render(viewName);
     });
 });
 
-app.listen(3000 , function () {
-	console.log ("server is listening!!!");
-} );
+app.use((req, res) => {
+    res.status(404).render("index", {
+        message: "Page not found.",
+        isError: true,
+    });
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`server is listening on port ${PORT}`);
+});

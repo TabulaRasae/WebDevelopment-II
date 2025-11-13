@@ -5,8 +5,23 @@
 <title>MyFreeCssTemplates.com free CSS template</title>
 <meta name="keywords" content="" />
 <meta name="description" content="" />
-<link href="styles.css" rel="stylesheet" type="text/css" />
+<link href="styles.css" rel="stylesheet" type="text/css" media="screen" />
 <link rel="stylesheet" href="nivo-slider.css" type="text/css" media="screen" />
+<style>
+  .message-banner {
+    margin: 10px;
+    padding: 10px;
+    border: 2px solid #3B3B3B;
+    background-color: #e6ffe6;
+    color: #033;
+    font-weight: bold;
+  }
+  .message-banner.error {
+    background-color: #ffe6e6;
+    border-color: #c44;
+    color: #600;
+  }
+</style>
 </head>
 <body>
 
@@ -14,11 +29,11 @@
 <!-- header begins -->
 <div id="header">
 	<div id="buttons">
-    <a href="index.html" class="but"  title="">Login</a><div class="but_razd"></div>
-    <a href="index.html" class="but"  title="">Home</a><div class="but_razd"></div>
-    <a href="products.html" class="but" title="">Products</a><div class="but_razd"></div>
-    <a href="about.html"  class="but" title="">About us</a><div class="but_razd"></div>
-    <a href="contact.html" class="but" title="">Contact us</a>
+    <a href="/" class="but"  title="">Home</a><div class="but_razd"></div>
+    <a href="/products" class="but" title="">Products</a><div class="but_razd"></div>
+    <a href="/about"  class="but" title="">About us</a><div class="but_razd"></div>
+    <a href="/login" class="but" title="">Login</a><div class="but_razd"></div>
+    <a href="/register" class="but" title="">Register</a>
   </div>
 	<div id="logo">
     	<b><a href="#">BMCC ELECTRONICS</a></b>
@@ -49,7 +64,10 @@
     </div>
     <div style="height:10px"></div>
         <!-- content begins -->
-       			<div id="content">
+        		<div id="content">
+                <% if (typeof message !== 'undefined' && message && message.length) { %>
+                  <div class="message-banner <%= isError ? 'error' : '' %>"><%= message %></div>
+                <% } %>
                 	<div id="left">
                         <h1>Welcome to Our Website</h1>
                         <div style="height:10px"></div>
