@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= product.name %> | BMCC UsedBooks Store</title>
+    <link href="/styles.css" rel="stylesheet" type="text/css" />
+  </head>
+  <body>
+    <div id="main">
+      <%- include('partials/navigation'); %>
+      <div id="content" class="content-panel">
+        <div class="hh1"><%= product.name %></div>
+        <p class="span_cont"><%= product.headline %></p>
+        <div class="detail-layout">
+          <img
+            src="<%= product.image %>"
+            class="detail-hero"
+            alt="<%= product.name %>"
+          />
+          <div class="detail-body">
+            <p class="size"><%= product.description %></p>
+            <ul class="spec-list">
+              <% product.specs.forEach(function(spec){ %>
+              <li><%= spec %></li>
+              <% }) %>
+            </ul>
+            <form action="/cart/add" method="post" class="detail-cart">
+              <input type="hidden" name="productId" value="<%= product.id %>" />
+              <input
+                type="hidden"
+                name="redirect"
+                value="/products/<%= product.id %>"
+              />
+              <label
+                >Quantity
+                <input type="number" name="quantity" min="1" value="1" />
+              </label>
+              <button type="submit" class="submit">
+                Add to Cart - $<%= product.price.toFixed(2) %>
+              </button>
+            </form>
+          </div>
+        </div>
+        <div class="detail-footer">
+          <a class="read" href="/products">back to products</a>
+        </div>
+      </div>
+      <%- include('partials/footer'); %>
+    </div>
+  </body>
+</html>

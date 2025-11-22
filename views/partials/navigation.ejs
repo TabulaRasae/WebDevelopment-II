@@ -1,0 +1,54 @@
+<div id="header" class="app-header">
+  <div id="logo">
+    <b><a href="/portal">BMCC UsedBooks Store</a></b>
+  </div>
+  <div id="buttons" class="main-nav">
+    <button class="nav-toggle" aria-label="Toggle navigation">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    <div class="nav-links">
+      <a href="/portal" class="but" title="Portal">Portal</a>
+      <div class="but_razd"></div>
+      <a href="/products" class="but" title="Products">Books</a>
+      <div class="but_razd"></div>
+      <a href="/about" class="but" title="About">About</a>
+      <div class="but_razd"></div>
+      <a href="/contact" class="but" title="Contact">Contact</a>
+      <div class="but_razd"></div>
+      <a href="/cart" class="but" title="Cart">Cart (<%= cartCount || 0 %>)</a>
+      <div class="but_razd"></div>
+      <a href="/logout" class="but" title="Log off">Logoff</a>
+    </div>
+  </div>
+</div>
+<p class="site-tagline">
+  Verified student-to-student textbook swaps · Signed in as
+  <strong><%= currentUser %></strong>
+</p>
+<div class="top">
+  <div id="slider-wrapper">
+    <div id="slider" class="nivoSlider">
+      <img src="/images/top.jpg" alt="Campus bookstore" />
+      <img src="/images/top2.jpg" alt="Students studying" />
+      <img src="/images/top3.jpg" alt="Library shelves" />
+    </div>
+  </div>
+</div>
+<script type="text/javascript" src="/lib/jquery-1.4.3.min.js"></script>
+<script type="text/javascript" src="/lib/jquery.nivo.slider.pack.js"></script>
+<script type="text/javascript">
+  $(window).load(function () {
+    $("#slider").nivoSlider();
+    const toggle = document.querySelector(".nav-toggle");
+    const links = document.querySelector(".nav-links");
+    if (toggle && links) {
+      toggle.addEventListener("click", function () {
+        links.classList.toggle("open");
+        toggle.classList.toggle("open");
+      });
+    }
+  });
+</script>
+<div style="height: 10px"></div>

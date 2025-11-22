@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contact | BMCC UsedBooks Store</title>
+    <link href="/styles.css" rel="stylesheet" type="text/css" />
+  </head>
+  <body>
+    <div id="main">
+      <%- include('partials/navigation'); %>
+      <div id="content" class="content-panel">
+        <div class="hh1">Contact & Support</div>
+        <p>
+          Need to verify an ISBN, schedule a pickup, or donate your old
+          textbooks? Reach out and a student volunteer will reply within one
+          business day.
+        </p>
+        <div class="contact-grid">
+          <div>
+            <h2>Support Channels</h2>
+            <ul class="spec-list">
+              <li>Email: usedbooks@bmcc.cuny.edu</li>
+              <li>Phone: (212) 220-8000 ext. 5555</li>
+              <li>Pickup Desk: Fiterman Hall, Room F-317</li>
+            </ul>
+          </div>
+          <form
+            action="mailto:usedbooks@bmcc.cuny.edu"
+            method="post"
+            class="contact-form"
+          >
+            <label
+              >Name
+              <input type="text" required />
+            </label>
+            <label
+              >Email
+              <input type="email" required />
+            </label>
+            <label
+              >Message
+              <textarea rows="4" required></textarea>
+            </label>
+            <button type="submit" class="submit">Send Message</button>
+          </form>
+        </div>
+      </div>
+      <%- include('partials/footer'); %>
+    </div>
+  </body>
+</html>
