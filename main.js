@@ -2,7 +2,7 @@ const express = require("express");
 const path = require("path");
 const session = require("express-session");
 const bcrypt = require("bcryptjs");
-const { User, Cart, Product } = require("./db");
+const { User, Cart, Product } = require("./database/db");
 
 const app = express();
 
@@ -266,7 +266,7 @@ app.get("/contact", requireAuth, (req, res) => {
 app.get("/cart", requireAuth, async (req, res) => {
   const cart = await getCartForUser(req.session.userId);
   const totals = cartTotals(cart);
-  res.render("cart", { cart, totals });
+  res.render("cart", { cart, totals, hideHero: true });
 });
 
 app.post("/cart/add", requireAuth, async (req, res) => {
@@ -302,6 +302,7 @@ app.post("/cart/add", requireAuth, async (req, res) => {
       totals: cartTotals(cart),
       message: "Unable to update cart right now.",
       isError: true,
+      hideHero: true,
     });
   }
 });

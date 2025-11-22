@@ -2,7 +2,7 @@
   "scripts": {
     "dev": "nodemon main.js",
     "start": "node main.js",
-    "seed": "node seed.js"
+    "seed": "node database/seed.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
