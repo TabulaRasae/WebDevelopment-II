@@ -17,7 +17,7 @@ const productCatalog = [
       "Format: Paperback, includes formula card",
     ],
     image:
-      "https://images.unsplash.com/photo-1528207776546-365bb710ee93?auto=format&fit=crop&w=900&q=80",
+      "https://m.media-amazon.com/images/I/410KfWepEFL._AC_UF1000,1000_QL80_.jpg",
   },
   {
     slug: "psych-exploration",
@@ -35,7 +35,7 @@ const productCatalog = [
       "Bonus: Unused MyLab code included",
     ],
     image:
-      "https://images.unsplash.com/photo-1488998527040-85054a85150e?auto=format&fit=crop&w=900&q=80",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQIjCInaE148oimdx5nUC1G61Kl_cZBN6D6TQ&s",
   },
   {
     slug: "python-workshop",
@@ -53,7 +53,7 @@ const productCatalog = [
       "Extras: Laminated quick reference sheet",
     ],
     image:
-      "https://images.unsplash.com/photo-1519682337058-a94d519337bc?auto=format&fit=crop&w=900&q=80",
+      "https://m.media-amazon.com/images/I/71pys4B4OVL._AC_UF1000,1000_QL80_.jpg",
   },
   {
     slug: "human-anatomy",
@@ -89,7 +89,7 @@ const productCatalog = [
       "Bonus: Speech outline template",
     ],
     image:
-      "https://images.unsplash.com/photo-1463320726281-696a485928c7?auto=format&fit=crop&w=900&q=80",
+      "https://m.media-amazon.com/images/I/81bIGIKwOML._AC_UF1000,1000_QL80_.jpg",
   },
 ];
 
