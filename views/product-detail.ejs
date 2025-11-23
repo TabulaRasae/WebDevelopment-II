@@ -56,9 +56,15 @@
                   <div class="title">Edit listing</div>
                   <p class="size">Update details for this book.</p>
                 </div>
-                <button type="button" class="submit ghost" id="editToggle">
-                  Edit
-                </button>
+                <div class="edit-controls">
+                  <button type="button" class="submit ghost" id="editToggle">
+                    Edit
+                  </button>
+                  <a class="chip-button" href="/products">back to products</a>
+                  <button type="button" class="chip-button danger" id="deleteToggle">
+                    delete listing
+                  </button>
+                </div>
               </div>
               <form
                 id="editForm"
@@ -107,7 +113,7 @@
                   </label>
                   <label class="wide">
                     Specs (one per line)
-                    <textarea name="specs" rows="3"><%= product.specs.join('\\n') %></textarea>
+                    <textarea name="specs" rows="3"><%= product.specs.join('\n') %></textarea>
                   </label>
                   <label class="wide">
                     Image URL
@@ -126,22 +132,31 @@
                   </button>
                 </div>
               </form>
+              <form
+                id="deleteForm"
+                class="danger-card"
+                action="/products/<%= product.id %>/delete"
+                method="post"
+              >
+                <p class="danger-title">Delete this listing?</p>
+                <p class="danger-copy">
+                  This will remove the book and clear it from any carts. This action
+                  cannot be undone.
+                </p>
+                <div class="danger-actions">
+                  <button type="button" class="link-button" id="cancelDelete">
+                    cancel
+                  </button>
+                  <button type="submit" class="submit danger-btn">
+                    Yes, delete it
+                  </button>
+                </div>
+              </form>
             </div>
             <% } %>
           </div>
         </div>
-        <div class="detail-footer">
-          <a class="read" href="/products">back to products</a>
-          <% if (isOwner || isAdmin) { %>
-          <form
-            action="/products/<%= product.id %>/delete"
-            method="post"
-            onsubmit="return confirm('Delete this listing?');"
-          >
-            <button type="submit" class="link-button danger">delete listing</button>
-          </form>
-          <% } %>
-        </div>
+        <div class="detail-footer"></div>
       </div>
       <%- include('partials/footer'); %>
     </div>
@@ -151,23 +166,31 @@
         const toggle = document.getElementById("editToggle");
         const form = document.getElementById("editForm");
         const cancel = document.getElementById("cancelEdit");
-        if (!toggle || !form) return;
+        if (toggle && form) {
+          const show = () => {
+            form.classList.add("open");
+            toggle.setAttribute("disabled", "disabled");
+          };
+          const hide = () => {
+            form.classList.remove("open");
+            toggle.removeAttribute("disabled");
+          };
+          toggle.addEventListener("click", show);
+          if (cancel) cancel.addEventListener("click", hide);
+          const hasMessage = document.querySelector(".message-banner");
+          if (hasMessage && hasMessage.classList.contains("error")) {
+            show();
+          }
+        }
 
-        const show = () => {
-          form.classList.add("open");
-          toggle.setAttribute("disabled", "disabled");
-        };
-        const hide = () => {
-          form.classList.remove("open");
-          toggle.removeAttribute("disabled");
-        };
-
-        toggle.addEventListener("click", show);
-        if (cancel) cancel.addEventListener("click", hide);
-
-        const hasMessage = document.querySelector(".message-banner");
-        if (hasMessage && hasMessage.classList.contains("error")) {
-          show();
+        const deleteToggle = document.getElementById("deleteToggle");
+        const deleteForm = document.getElementById("deleteForm");
+        const cancelDelete = document.getElementById("cancelDelete");
+        if (deleteToggle && deleteForm) {
+          const showDelete = () => deleteForm.classList.add("open");
+          const hideDelete = () => deleteForm.classList.remove("open");
+          deleteToggle.addEventListener("click", showDelete);
+          if (cancelDelete) cancelDelete.addEventListener("click", hideDelete);
         }
       })();
     </script>

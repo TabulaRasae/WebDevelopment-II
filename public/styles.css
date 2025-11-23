@@ -345,6 +345,12 @@ body{
 	height: 100%;
 }
 
+.product-card .title {
+	font-weight: 700;
+	color: var(--color-primary-dark);
+	margin-top: 6px;
+}
+
 
 #left{
 	width: 625px;
@@ -732,17 +738,25 @@ float: left;}
 }
 
 .edit-card {
-	border: 1px dashed rgba(27, 73, 101, 0.25);
+	border: 0;
 	border-radius: 16px;
 	padding: 14px;
 	background: #f9fbff;
 	box-shadow: 0 6px 14px rgba(16, 42, 67, 0.05);
+	margin-top: auto;
 }
 
 .edit-header {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+.edit-controls {
+	display: flex;
+	align-items: center;
 	gap: 10px;
 	flex-wrap: wrap;
 }
@@ -762,6 +776,7 @@ float: left;}
 	display: flex;
 	gap: 10px;
 	align-items: center;
+	flex-wrap: wrap;
 }
 
 .add-book-header {
@@ -987,11 +1002,16 @@ float: left;}
 	list-style: none;
 	padding: 0;
 	margin: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	white-space: normal;
 }
 
 .spec-list li {
-	padding: 4px 0;
-	border-bottom: 1px solid var(--color-border);
+	padding: 0;
+	margin: 0;
+	border: 0;
 }
 
 .portal-grid,
@@ -1029,7 +1049,7 @@ float: left;}
 	display: flex;
 	flex-wrap: wrap;
 	gap: 30px;
-	align-items: flex-start;
+	align-items: stretch;
 }
 
 .product-cover.is-detail {
@@ -1134,6 +1154,84 @@ float: left;}
 
 .link-button.danger {
 	color: #b42318;
+}
+
+.chip-button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	padding: 8px 14px;
+	border-radius: 999px;
+	border: 1px solid rgba(27, 73, 101, 0.22);
+	background: #ffffff;
+	color: var(--color-primary-dark);
+	font-weight: 700;
+	font-size: 13px;
+	text-decoration: none;
+	box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+	cursor: pointer;
+}
+
+.chip-button:hover {
+	background: rgba(27, 73, 101, 0.05);
+}
+
+.chip-button.danger {
+	background: linear-gradient(90deg, #b42318, #972d07);
+	color: #fff;
+	border-color: transparent;
+	box-shadow: 0 12px 22px rgba(151, 45, 7, 0.24);
+}
+
+.chip-button.danger:hover {
+	opacity: 0.9;
+}
+
+.danger-zone {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	position: relative;
+}
+
+.danger-card {
+	display: none;
+	flex-direction: column;
+	gap: 10px;
+	background: #fff8f6;
+	border: 1px solid rgba(180, 35, 24, 0.2);
+	border-radius: 14px;
+	padding: 14px;
+	max-width: 320px;
+	box-shadow: 0 14px 30px rgba(0, 0, 0, 0.12);
+}
+
+.danger-card.open {
+	display: flex;
+}
+
+.danger-title {
+	font-weight: 800;
+	color: #972d07;
+	margin: 0;
+}
+
+.danger-copy {
+	margin: 0;
+	color: #5f370e;
+}
+
+.danger-actions {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	justify-content: flex-end;
+}
+
+.danger-btn {
+	background: linear-gradient(90deg, #b42318, #972d07);
+	box-shadow: 0 10px 20px rgba(151, 45, 7, 0.25);
 }
 
 .auth-page {
