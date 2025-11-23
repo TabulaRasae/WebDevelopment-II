@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Books | BMCC UsedBooks Store</title>
+    <link href="/styles.css" rel="stylesheet" type="text/css" />
+  </head>
+  <body>
+    <div id="main">
+      <%- include('partials/navigation'); %>
+      <div id="content">
+        <div class="hh1">Available textbooks</div>
+        <p>
+          Each listing is verified by the Student Activities Book Committee
+          before it goes live. Reserve a title, pick it up at Fiterman Hall, and
+          return it when you're done.
+        </p>
+        <div class="product-grid">
+          <% products.forEach(function(product){ %>
+          <div class="product-card">
+            <a class="product-link" href="/products/<%= product.id %>">
+              <img
+                src="<%= product.image %>"
+                alt="<%= product.name %>"
+                class="product-thumb"
+              />
+              <div class="title"><%= product.name %></div>
+              <p class="size"><%= product.shortDescription %></p>
+            </a>
+            <ul class="spec-list">
+              <% product.specs.forEach(function(spec){ %>
+              <li><%= spec %></li>
+              <% }) %>
+            </ul>
+            <div class="product-actions">
+              <form action="/cart/add" method="post" class="cart-inline">
+                <input
+                  type="hidden"
+                  name="productId"
+                  value="<%= product.id %>"
+                />
+                <input type="hidden" name="redirect" value="/products" />
+                <label>
+                  Qty
+                  <input type="number" name="quantity" min="1" value="1" />
+                </label>
+                <button type="submit" class="submit">
+                  Add to Cart - $<%= product.price.toFixed(2) %>
+                </button>
+              </form>
+            </div>
+          </div>
+          <% }) %>
+        </div>
+      </div>
+      <%- include('partials/footer'); %>
+    </div>
+  </body>
+</html>

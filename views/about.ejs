@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>About BMCC UsedBooks Store</title>
+    <link href="/styles.css" rel="stylesheet" type="text/css" />
+  </head>
+  <body>
+    <div id="main">
+      <%- include('partials/navigation'); %>
+      <div id="content" class="content-panel">
+        <div class="hh1">About the program</div>
+        <p class="size">
+          BMCC UsedBooks Store is a student-led initiative that keeps course
+          materials in circulation and out of landfills. We verify every ISBN,
+          log each transaction, and host weekly swap events so you can buy or
+          sell textbooks without leaving campus.
+        </p>
+        <div class="team-grid">
+          <div class="team-card">
+            <img
+              src="https://images.unsplash.com/photo-1544723795-3fb6469f5b39?auto=format&fit=crop&w=300&q=80"
+              alt="Maya Patel"
+            />
+            <h3>Maya Patel</h3>
+            <p class="span_cont">Program Coordinator</p>
+            <p>
+              Maya schedules donation drives and keeps our listing guidelines up
+              to date so every buyer knows exactly what they're getting.
+            </p>
+          </div>
+          <div class="team-card">
+            <img
+              src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&q=80"
+              alt="Luis Romero"
+            />
+            <h3>Luis Romero</h3>
+            <p class="span_cont">Quality Lead</p>
+            <p>
+              Luis inspects donated books, checks for missing pages, and labels
+              every copy with an honest condition rating.
+            </p>
+          </div>
+          <div class="team-card">
+            <img
+              src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=300&q=80"
+              alt="Serena Wong"
+            />
+            <h3>Serena Wong</h3>
+            <p class="span_cont">Logistics & Pickup</p>
+            <p>
+              Serena coordinates lockers and on-campus pickup appointments so
+              transactions are quick, safe, and accessible.
+            </p>
+          </div>
+        </div>
+        <p>
+          All proceeds fund emergency textbook grants for BMCC students. Thanks
+          for helping us keep the cycle going.
+        </p>
+      </div>
+      <%- include('partials/footer'); %>
+    </div>
+  </body>
+</html>
