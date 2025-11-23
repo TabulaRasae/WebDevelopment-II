@@ -4,13 +4,14 @@ const path = require("path");
 const session = require("express-session");
 const bcrypt = require("bcryptjs");
 const { User, Cart, Product } = require("./database/db");
+const publicDir = path.join(__dirname, "public");
 
 const app = express();
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
-app.use(express.static("public"));
+app.use(express.static(publicDir));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(
