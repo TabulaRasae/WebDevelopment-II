@@ -1,13 +1,24 @@
+require("dotenv").config();
 const mongoose = require("mongoose");
+
+const mongoUri =
+  process.env.MONGODB_URL ||
+  process.env.MONGODB_URI ||
+  "mongodb://localhost:27017/cis485";
 
 mongoose.Promise = global.Promise;
 mongoose
-  .connect(process.env.MONGODB_URI || "mongodb://localhost:27017/cis485", {
+  .connect(mongoUri, {
     useUnifiedTopology: true,
     useNewUrlParser: true,
   })
   .then(() => console.log("MongoDB connected"))
-  .catch((err) => console.error("Mongo connection failed", err));
+  .catch((err) =>
+    console.error(
+      "Mongo connection failed. Check MONGODB_URI or MONGO_URL environment variables.",
+      err
+    )
+  );
 
 const loginSchema = new mongoose.Schema({
   userid: { type: String, required: true, unique: true },
