@@ -96,16 +96,21 @@ app.use(async (req, res, next) => {
   }
 });
 
-app.get("/", (req, res) => {
-  if (req.session?.userId) {
-    return res.redirect("/portal");
-  }
-  return res.redirect("/login");
-});
+const renderHome = async (req, res) => {
+  const cart = await Cart.findOne({ userId: req.session.userId }).lean();
+  const totals = cart
+    ? cartTotals(cart)
+    : { subtotal: 0, tax: 0, grandTotal: 0 };
+  const featured = await Product.find().sort({ name: 1 }).limit(3).lean();
+  res.render("index", {
+    featuredProducts: featured.map(mapProduct),
+    totals,
+  });
+};
 
 app.get("/register", (req, res) => {
   if (req.session?.userId) {
-    return res.redirect("/portal");
+    return res.redirect("/");
   }
   renderWithMessage(res, "register", "", false, { hideNav: true });
 });
@@ -171,7 +176,7 @@ app.post("/register", async (req, res) => {
 
 app.get("/login", (req, res) => {
   if (req.session?.userId) {
-    return res.redirect("/portal");
+    return res.redirect("/");
   }
   renderWithMessage(res, "login", "", false, { hideNav: true });
 });
@@ -209,7 +214,7 @@ app.post("/login", async (req, res) => {
     req.session.userId = user.userid;
     await getCartForUser(user.userid);
 
-    return res.redirect("/portal");
+    return res.redirect("/");
   } catch (error) {
     console.error("Login failed", error);
     return renderWithMessage(
@@ -230,17 +235,8 @@ app.get("/logout", requireAuth, (req, res) => {
   });
 });
 
-app.get("/portal", requireAuth, async (req, res) => {
-  const cart = await Cart.findOne({ userId: req.session.userId }).lean();
-  const totals = cart
-    ? cartTotals(cart)
-    : { subtotal: 0, tax: 0, grandTotal: 0 };
-  const featured = await Product.find().sort({ name: 1 }).limit(3).lean();
-  res.render("index", {
-    featuredProducts: featured.map(mapProduct),
-    totals,
-  });
-});
+app.get("/", requireAuth, renderHome);
+app.get("/portal", requireAuth, (req, res) => res.redirect("/"));
 
 app.get("/products", requireAuth, async (req, res) => {
   const products = await fetchProducts();
@@ -344,6 +340,9 @@ app.post("/cart/checkout", requireAuth, async (req, res) => {
 app.get("/thankyou", requireAuth, (req, res) => {
   const justCheckedOut = req.session.justCheckedOut;
   req.session.justCheckedOut = false;
+  if (!justCheckedOut) {
+    return res.redirect("/");
+  }
   res.render("thankyou", { justCheckedOut });
 });
 
@@ -351,7 +350,11 @@ app.use((req, res) => {
   res.status(404).render("not-found", { resource: "Page" });
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`server is listening on port ${PORT}`);
-});
+if (require.main === module) {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`server is listening on port ${PORT}`);
+  });
+}
+
+module.exports = app;
