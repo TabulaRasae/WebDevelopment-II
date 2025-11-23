@@ -16,6 +16,83 @@
           before it goes live. Reserve a title, pick it up at Fiterman Hall, and
           return it when you're done.
         </p>
+        <% if (typeof message !== "undefined" && message) { %>
+        <div class="message-banner <%= isError ? 'error' : '' %>">
+          <%= message %>
+        </div>
+        <% } %>
+        <div class="add-book-card">
+          <div class="add-book-header">
+            <div>
+              <div class="title">List a textbook</div>
+              <p class="size">
+                Add your own listing so classmates can pick it up.
+              </p>
+            </div>
+            <button type="button" id="addBookToggle" class="submit ghost">
+              Add a book
+            </button>
+          </div>
+          <form
+            id="addBookForm"
+            class="add-book-form"
+            action="/products/new"
+            method="post"
+          >
+            <div class="form-grid">
+              <label>
+                Title
+                <input type="text" name="name" required />
+              </label>
+              <label>
+                Price (USD)
+                <input type="number" name="price" min="0.01" step="0.01" required />
+              </label>
+              <label>
+                Headline
+                <input
+                  type="text"
+                  name="headline"
+                  maxlength="140"
+                  placeholder="Quick one-liner"
+                  required
+                />
+              </label>
+              <label class="wide">
+                Short description
+                <textarea
+                  name="shortDescription"
+                  rows="2"
+                  maxlength="180"
+                  required
+                ></textarea>
+              </label>
+              <label class="wide">
+                Full description
+                <textarea name="description" rows="3" required></textarea>
+              </label>
+              <label class="wide">
+                Specs (one per line)
+                <textarea name="specs" rows="3" placeholder="ISBN, Edition, Condition"></textarea>
+              </label>
+              <label class="wide">
+                Image URL
+                <input
+                  type="url"
+                  name="image"
+                  placeholder="https://example.com/cover.jpg"
+                  required
+                />
+              </label>
+            </div>
+            <div class="add-book-actions">
+              <button type="submit" class="submit">Create listing</button>
+              <button type="button" class="link-button" id="cancelAddBook">
+                cancel
+              </button>
+            </div>
+          </form>
+        </div>
         <div class="product-grid">
           <% products.forEach(function(product){ %>
           <div class="product-card">
@@ -34,11 +111,11 @@
               <% product.specs.forEach(function(spec){ %>
               <li><%= spec %></li>
               <% }) %>
-            </ul>
-            <div class="product-actions">
-              <form action="/cart/add" method="post" class="cart-inline">
-                <input
-                  type="hidden"
+              </ul>
+              <div class="product-actions">
+                <form action="/cart/add" method="post" class="cart-inline">
+                  <input
+                    type="hidden"
                   name="productId"
                   value="<%= product.id %>"
                 />
@@ -58,5 +135,31 @@
       </div>
       <%- include('partials/footer'); %>
     </div>
+    <script>
+      (function() {
+        const toggleButton = document.getElementById("addBookToggle");
+        const form = document.getElementById("addBookForm");
+        const cancelButton = document.getElementById("cancelAddBook");
+        if (!toggleButton || !form) return;
+
+        const showForm = () => {
+          form.classList.add("open");
+          toggleButton.setAttribute("disabled", "disabled");
+        };
+        const hideForm = () => {
+          form.classList.remove("open");
+          toggleButton.removeAttribute("disabled");
+        };
+
+        toggleButton.addEventListener("click", showForm);
+        if (cancelButton) {
+          cancelButton.addEventListener("click", hideForm);
+        }
+        const hasError = document.querySelector(".message-banner.error");
+        if (hasError) {
+          showForm();
+        }
+      })();
+    </script>
   </body>
 </html>

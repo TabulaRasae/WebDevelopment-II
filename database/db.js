@@ -50,6 +50,7 @@ const productSchema = new mongoose.Schema(
     headline: { type: String, required: true },
     specs: [{ type: String }],
     image: { type: String, required: true },
+    ownerId: { type: String, default: null },
   },
   { timestamps: true }
 );

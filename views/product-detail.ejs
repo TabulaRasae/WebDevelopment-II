@@ -12,6 +12,11 @@
       <div id="content" class="content-panel">
         <div class="hh1"><%= product.name %></div>
         <p class="span_cont"><%= product.headline %></p>
+        <% if (typeof message !== "undefined" && message) { %>
+        <div class="message-banner <%= isError ? 'error' : '' %>">
+          <%= message %>
+        </div>
+        <% } %>
         <div class="detail-layout">
           <div class="detail-hero">
             <div class="product-cover is-detail">
@@ -44,13 +49,128 @@
                 Add to Cart - $<%= product.price.toFixed(2) %>
               </button>
             </form>
+            <% if (isOwner || isAdmin) { %>
+            <div class="edit-card">
+              <div class="edit-header">
+                <div>
+                  <div class="title">Edit listing</div>
+                  <p class="size">Update details for this book.</p>
+                </div>
+                <button type="button" class="submit ghost" id="editToggle">
+                  Edit
+                </button>
+              </div>
+              <form
+                id="editForm"
+                class="edit-form"
+                action="/products/<%= product.id %>/update"
+                method="post"
+              >
+                <div class="form-grid">
+                  <label>
+                    Title
+                    <input type="text" name="name" value="<%= product.name %>" required />
+                  </label>
+                  <label>
+                    Price (USD)
+                    <input
+                      type="number"
+                      name="price"
+                      min="0.01"
+                      step="0.01"
+                      value="<%= product.price %>"
+                      required
+                    />
+                  </label>
+                  <label>
+                    Headline
+                    <input
+                      type="text"
+                      name="headline"
+                      maxlength="140"
+                      value="<%= product.headline %>"
+                      required
+                    />
+                  </label>
+                  <label class="wide">
+                    Short description
+                    <textarea
+                      name="shortDescription"
+                      rows="2"
+                      maxlength="180"
+                      required
+                    ><%= product.shortDescription %></textarea>
+                  </label>
+                  <label class="wide">
+                    Full description
+                    <textarea name="description" rows="3" required><%= product.description %></textarea>
+                  </label>
+                  <label class="wide">
+                    Specs (one per line)
+                    <textarea name="specs" rows="3"><%= product.specs.join('\\n') %></textarea>
+                  </label>
+                  <label class="wide">
+                    Image URL
+                    <input
+                      type="url"
+                      name="image"
+                      value="<%= product.image %>"
+                      required
+                    />
+                  </label>
+                </div>
+                <div class="edit-actions">
+                  <button type="submit" class="submit">Save changes</button>
+                  <button type="button" class="link-button" id="cancelEdit">
+                    cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+            <% } %>
           </div>
         </div>
         <div class="detail-footer">
           <a class="read" href="/products">back to products</a>
+          <% if (isOwner || isAdmin) { %>
+          <form
+            action="/products/<%= product.id %>/delete"
+            method="post"
+            onsubmit="return confirm('Delete this listing?');"
+          >
+            <button type="submit" class="link-button danger">delete listing</button>
+          </form>
+          <% } %>
         </div>
       </div>
       <%- include('partials/footer'); %>
     </div>
+    <% if (isOwner || isAdmin) { %>
+    <script>
+      (function () {
+        const toggle = document.getElementById("editToggle");
+        const form = document.getElementById("editForm");
+        const cancel = document.getElementById("cancelEdit");
+        if (!toggle || !form) return;
+
+        const show = () => {
+          form.classList.add("open");
+          toggle.setAttribute("disabled", "disabled");
+        };
+        const hide = () => {
+          form.classList.remove("open");
+          toggle.removeAttribute("disabled");
+        };
+
+        toggle.addEventListener("click", show);
+        if (cancel) cancel.addEventListener("click", hide);
+
+        const hasMessage = document.querySelector(".message-banner");
+        if (hasMessage && hasMessage.classList.contains("error")) {
+          show();
+        }
+      })();
+    </script>
+    <% } %>
   </body>
 </html>

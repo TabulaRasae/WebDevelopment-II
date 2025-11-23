@@ -75,6 +75,40 @@ const fetchProductBySlug = async (slug) => {
   return mapProduct(doc);
 };
 
+const isAdminUser = (req) => req.session?.userId === "Admin";
+
+const slugify = (text) => {
+  return (
+    text
+      .toString()
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "") || `book-${Date.now()}`
+  );
+};
+
+const uniqueSlugForName = async (name) => {
+  const base = slugify(name);
+  let slug = base;
+  let counter = 1;
+  while (await Product.exists({ slug })) {
+    slug = `${base}-${counter++}`;
+  }
+  return slug;
+};
+
+const parseSpecs = (value = "") =>
+  value
+    .split(/\r?\n|,/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+const renderProductsPage = async (req, res, message = "", isError = false) => {
+  const products = await fetchProducts();
+  res.render("products", { products, message, isError });
+};
+
 app.use((req, res, next) => {
   console.log(`request made to: ${req.method} ${req.url}`);
   res.locals.currentUser = req.session?.userId || null;
@@ -241,8 +275,7 @@ app.get("/", requireAuth, renderHome);
 app.get("/portal", requireAuth, (req, res) => res.redirect("/"));
 
 app.get("/products", requireAuth, async (req, res) => {
-  const products = await fetchProducts();
-  res.render("products", { products });
+  await renderProductsPage(req, res);
 });
 
 app.get("/products/:productId", requireAuth, async (req, res) => {
@@ -250,7 +283,16 @@ app.get("/products/:productId", requireAuth, async (req, res) => {
   if (!product) {
     return res.status(404).render("not-found", { resource: "Product" });
   }
-  return res.render("product-detail", { product });
+  const isOwner =
+    product.ownerId && req.session.userId === String(product.ownerId);
+  const isAdmin = isAdminUser(req);
+  return res.render("product-detail", {
+    product,
+    isOwner,
+    isAdmin,
+    message: "",
+    isError: false,
+  });
 });
 
 app.get("/about", requireAuth, (req, res) => {
@@ -346,6 +388,205 @@ app.get("/thankyou", requireAuth, (req, res) => {
     return res.redirect("/");
   }
   res.render("thankyou", { justCheckedOut });
+});
+
+app.post("/products/new", requireAuth, async (req, res) => {
+  try {
+    const {
+      name,
+      price,
+      shortDescription,
+      description,
+      headline,
+      image,
+      specs,
+    } = req.body;
+
+    if (
+      !name ||
+      !price ||
+      !shortDescription ||
+      !description ||
+      !headline ||
+      !image
+    ) {
+      return renderProductsPage(
+        req,
+        res,
+        "All fields are required to create a listing.",
+        true
+      );
+    }
+
+    const priceNumber = Number(price);
+    if (Number.isNaN(priceNumber) || priceNumber <= 0) {
+      return renderProductsPage(
+        req,
+        res,
+        "Price must be a positive number.",
+        true
+      );
+    }
+
+    const slug = await uniqueSlugForName(name);
+    await Product.create({
+      slug,
+      name: name.trim(),
+      price: priceNumber,
+      shortDescription: shortDescription.trim(),
+      description: description.trim(),
+      headline: headline.trim(),
+      image: image.trim(),
+      specs: parseSpecs(specs),
+      ownerId: req.session.userId,
+    });
+
+    return res.redirect("/products");
+  } catch (error) {
+    console.error("Failed to create product", error);
+    return renderProductsPage(
+      req,
+      res,
+      "Unable to create listing right now.",
+      true
+    );
+  }
+});
+
+app.post("/products/:productId/delete", requireAuth, async (req, res) => {
+  try {
+    const slug = req.params.productId;
+    const product = await Product.findOne({ slug }).lean();
+    if (!product) {
+      return res.status(404).render("not-found", { resource: "Product" });
+    }
+
+    const isOwner =
+      product.ownerId && product.ownerId === req.session.userId;
+    const isAdmin = isAdminUser(req);
+    if (!isOwner && !isAdmin) {
+      return res.status(403).render("product-detail", {
+        product: mapProduct(product),
+        isOwner,
+        isAdmin,
+        message: "You can only delete a listing you created.",
+        isError: true,
+      });
+    }
+
+    await Product.deleteOne({ slug });
+    await Cart.updateMany({}, { $pull: { items: { productId: slug } } });
+
+    return res.redirect("/products");
+  } catch (error) {
+    console.error("Failed to delete product", error);
+    const product = await fetchProductBySlug(req.params.productId);
+    return res.status(500).render("product-detail", {
+      product,
+      isOwner:
+        product && product.ownerId === req.session.userId ? true : false,
+      isAdmin: isAdminUser(req),
+      message: "Unable to delete this listing right now.",
+      isError: true,
+    });
+  }
+});
+
+app.post("/products/:productId/update", requireAuth, async (req, res) => {
+  try {
+    const slug = req.params.productId;
+    const product = await Product.findOne({ slug }).lean();
+    if (!product) {
+      return res.status(404).render("not-found", { resource: "Product" });
+    }
+
+    const isOwner =
+      product.ownerId && product.ownerId === req.session.userId;
+    const isAdmin = isAdminUser(req);
+    if (!isOwner && !isAdmin) {
+      return res.status(403).render("product-detail", {
+        product: mapProduct(product),
+        isOwner,
+        isAdmin,
+        message: "You can only update a listing you created.",
+        isError: true,
+      });
+    }
+
+    const {
+      name,
+      price,
+      shortDescription,
+      description,
+      headline,
+      image,
+      specs,
+    } = req.body;
+
+    if (
+      !name ||
+      !price ||
+      !shortDescription ||
+      !description ||
+      !headline ||
+      !image
+    ) {
+      return res.status(400).render("product-detail", {
+        product: mapProduct(product),
+        isOwner,
+        isAdmin,
+        message: "All fields are required to update this listing.",
+        isError: true,
+      });
+    }
+
+    const priceNumber = Number(price);
+    if (Number.isNaN(priceNumber) || priceNumber <= 0) {
+      return res.status(400).render("product-detail", {
+        product: mapProduct(product),
+        isOwner,
+        isAdmin,
+        message: "Price must be a positive number.",
+        isError: true,
+      });
+    }
+
+    const update = {
+      name: name.trim(),
+      price: priceNumber,
+      shortDescription: shortDescription.trim(),
+      description: description.trim(),
+      headline: headline.trim(),
+      image: image.trim(),
+      specs: parseSpecs(specs),
+    };
+
+    const updated = await Product.findOneAndUpdate(
+      { slug },
+      { $set: update },
+      { new: true, lean: true }
+    );
+
+    return res.render("product-detail", {
+      product: mapProduct(updated),
+      isOwner,
+      isAdmin,
+      message: "Listing updated successfully.",
+      isError: false,
+    });
+  } catch (error) {
+    console.error("Failed to update product", error);
+    const product = await fetchProductBySlug(req.params.productId);
+    const isOwner =
+      product && product.ownerId === req.session.userId ? true : false;
+    return res.status(500).render("product-detail", {
+      product,
+      isOwner,
+      isAdmin: isAdminUser(req),
+      message: "Unable to update this listing right now.",
+      isError: true,
+    });
+  }
 });
 
 app.use((req, res) => {

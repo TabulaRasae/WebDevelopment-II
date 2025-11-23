@@ -7,31 +7,42 @@
     <link href="/styles.css" rel="stylesheet" type="text/css" />
   </head>
   <body class="auth-page">
-    <div class="auth-panel">
-      <h1>Sign in</h1>
-      <p>
-        Use your BMCC username to browse used textbooks, reserve copies, and
-        keep your cart synced across sessions.
-      </p>
-      <% if (typeof message !== 'undefined' && message) { %>
-      <div class="message-banner <%= isError ? 'error' : '' %>">
-        <%= message %>
+    <div class="auth-shell">
+      <div class="auth-visual" aria-hidden="true">
+        <div class="auth-visual__overlay">
+          <p class="kicker">BMCC Used Books</p>
+          <h2>Verified textbooks, student-to-student</h2>
+          <p class="lede">
+            Reserve titles, pick them up on campus, and keep your studies moving.
+          </p>
+        </div>
       </div>
-      <% } %>
-      <form action="/login" method="post" class="auth-form">
-        <label
-          >Username
-          <input type="text" name="userid" required />
-        </label>
-        <label
-          >Password
-          <input type="password" name="password" required />
-        </label>
-        <button type="submit" class="submit">Log in</button>
-      </form>
-      <p class="auth-switch">
-        Need an account? <a href="/register">Register here</a>
-      </p>
+      <div class="auth-panel">
+        <h1>Sign in</h1>
+        <p>
+          Use your BMCC username to browse used textbooks, reserve copies, and
+          keep your cart synced across sessions.
+        </p>
+        <% if (typeof message !== 'undefined' && message) { %>
+        <div class="message-banner <%= isError ? 'error' : '' %>">
+          <%= message %>
+        </div>
+        <% } %>
+        <form action="/login" method="post" class="auth-form">
+          <label
+            >Username
+            <input type="text" name="userid" required />
+          </label>
+          <label
+            >Password
+            <input type="password" name="password" required />
+          </label>
+          <button type="submit" class="submit">Log in</button>
+        </form>
+        <p class="auth-switch">
+          Need an account? <a href="/register">Register here</a>
+        </p>
+      </div>
     </div>
   </body>
 </html>
