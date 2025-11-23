@@ -13,11 +13,15 @@
         <div class="hh1"><%= product.name %></div>
         <p class="span_cont"><%= product.headline %></p>
         <div class="detail-layout">
-          <img
-            src="<%= product.image %>"
-            class="detail-hero"
-            alt="<%= product.name %>"
-          />
+          <div class="detail-hero">
+            <div class="product-cover is-detail">
+              <img
+                src="<%= product.image %>"
+                class="book-image"
+                alt="<%= product.name %>"
+              />
+            </div>
+          </div>
           <div class="detail-body">
             <p class="size"><%= product.description %></p>
             <ul class="spec-list">

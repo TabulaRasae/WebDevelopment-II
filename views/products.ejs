@@ -20,11 +20,13 @@
           <% products.forEach(function(product){ %>
           <div class="product-card">
             <a class="product-link" href="/products/<%= product.id %>">
-              <img
-                src="<%= product.image %>"
-                alt="<%= product.name %>"
-                class="product-thumb"
-              />
+              <div class="product-cover">
+                <img
+                  src="<%= product.image %>"
+                  alt="<%= product.name %>"
+                  class="book-image"
+                />
+              </div>
               <div class="title"><%= product.name %></div>
               <p class="size"><%= product.shortDescription %></p>
             </a>

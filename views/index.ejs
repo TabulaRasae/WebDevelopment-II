@@ -41,11 +41,13 @@
         <div class="product-grid">
           <% featuredProducts.forEach(function(product){ %>
           <div class="product-card">
-            <img
-              src="<%= product.image %>"
-              alt="<%= product.name %>"
-              class="product-thumb"
-            />
+            <div class="product-cover">
+              <img
+                src="<%= product.image %>"
+                alt="<%= product.name %>"
+                class="book-image"
+              />
+            </div>
             <div class="title"><%= product.name %></div>
             <p class="size"><%= product.shortDescription %></p>
             <div class="product-actions">
