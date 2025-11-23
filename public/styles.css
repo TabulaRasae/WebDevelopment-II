@@ -715,14 +715,12 @@ float: left;}
 	border-radius: 12px;
 	box-shadow: 0 12px 26px rgba(13, 27, 42, 0.18), 0 18px 34px rgba(31, 122, 140, 0.1);
 	transition: transform 260ms ease, box-shadow 260ms ease, filter 260ms ease;
-	animation: bookFloat 9s ease-in-out infinite;
+	will-change: transform, box-shadow;
 }
 
 .product-card:hover .book-image,
 .product-cover.is-detail:hover .book-image {
-	transform: translateY(-6px) rotate(-0.6deg) scale(1.06);
-	box-shadow: 0 18px 32px rgba(13, 27, 42, 0.22), 0 24px 40px rgba(31, 122, 140, 0.16);
-	animation: none;
+	animation: bookPulse 3.4s ease-in-out infinite;
 }
 
 .product-card:hover .product-cover::after,
@@ -730,13 +728,15 @@ float: left;}
 	opacity: 1;
 }
 
-@keyframes bookFloat {
+@keyframes bookPulse {
 	0%,
 	100% {
-		transform: translateY(0);
+		transform: translateY(-4px) rotate(-0.6deg) scale(1.02);
+		box-shadow: 0 18px 32px rgba(13, 27, 42, 0.2), 0 24px 40px rgba(31, 122, 140, 0.14);
 	}
 	50% {
-		transform: translateY(-4px);
+		transform: translateY(-8px) rotate(-0.6deg) scale(1.08);
+		box-shadow: 0 22px 36px rgba(13, 27, 42, 0.24), 0 30px 46px rgba(31, 122, 140, 0.18);
 	}
 }
 
