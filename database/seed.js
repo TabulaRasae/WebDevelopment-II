@@ -71,7 +71,7 @@ const productCatalog = [
       "Includes: Lab manual + tab set",
     ],
     image:
-      "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=900&q=80",
+      "https://m.media-amazon.com/images/I/81bIGIKwOML._AC_UF1000,1000_QL80_.jpg",
   },
   {
     slug: "public-speaking",
@@ -89,7 +89,7 @@ const productCatalog = [
       "Bonus: Speech outline template",
     ],
     image:
-      "https://m.media-amazon.com/images/I/81bIGIKwOML._AC_UF1000,1000_QL80_.jpg",
+      "https://m.media-amazon.com/images/I/81qt2t60JbL._AC_UF1000,1000_QL80_.jpg",
   },
 ];
 
