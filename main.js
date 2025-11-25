@@ -27,6 +27,7 @@ app.use(
   })
 );
 
+//State functions
 const renderWithMessage = (
   res,
   view,
@@ -149,6 +150,7 @@ const renderHome = async (req, res) => {
   });
 };
 
+// Routes
 app.get("/register", (req, res) => {
   if (req.session?.userId) {
     return res.redirect("/");
@@ -466,8 +468,7 @@ app.post("/products/:productId/delete", requireAuth, async (req, res) => {
       return res.status(404).render("not-found", { resource: "Product" });
     }
 
-    const isOwner =
-      product.ownerId && product.ownerId === req.session.userId;
+    const isOwner = product.ownerId && product.ownerId === req.session.userId;
     const isAdmin = isAdminUser(req);
     if (!isOwner && !isAdmin) {
       return res.status(403).render("product-detail", {
@@ -488,8 +489,7 @@ app.post("/products/:productId/delete", requireAuth, async (req, res) => {
     const product = await fetchProductBySlug(req.params.productId);
     return res.status(500).render("product-detail", {
       product,
-      isOwner:
-        product && product.ownerId === req.session.userId ? true : false,
+      isOwner: product && product.ownerId === req.session.userId ? true : false,
       isAdmin: isAdminUser(req),
       message: "Unable to delete this listing right now.",
       isError: true,
@@ -505,8 +505,7 @@ app.post("/products/:productId/update", requireAuth, async (req, res) => {
       return res.status(404).render("not-found", { resource: "Product" });
     }
 
-    const isOwner =
-      product.ownerId && product.ownerId === req.session.userId;
+    const isOwner = product.ownerId && product.ownerId === req.session.userId;
     const isAdmin = isAdminUser(req);
     if (!isOwner && !isAdmin) {
       return res.status(403).render("product-detail", {
