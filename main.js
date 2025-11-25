@@ -27,7 +27,7 @@ app.use(
   })
 );
 
-//State functions
+//Utility functions
 const renderWithMessage = (
   res,
   view,
