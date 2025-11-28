@@ -34,16 +34,16 @@ export default function Products({ products, currentUser, cartCount: count }) {
   const router = useRouter();
   const [banner, setBanner] = useState({ message: "", isError: false });
   const [showForm, setShowForm] = useState(false);
+  const [search, setSearch] = useState("");
   const [form, setForm] = useState({
-    name: "",
+    title: "",
+    edition: "",
     price: "",
-    shortDescription: "",
-    description: "",
-    headline: "",
-    image: "",
-    specs: "",
+    condition: "",
+    authors: "",
   });
   const [quantities, setQuantities] = useState({});
+  const [generating, setGenerating] = useState(false);
   const priceLabels = useMemo(
     () =>
       products.reduce((map, product) => {
@@ -52,35 +52,57 @@ export default function Products({ products, currentUser, cartCount: count }) {
       }, {}),
     [products]
   );
+  const filteredProducts = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    if (!term) return products;
+    return products.filter((product) => {
+      const haystack = [
+        product.name,
+        product.shortDescription,
+        product.specs.join(" "),
+      ]
+        .join(" ")
+        .toLowerCase();
+      return haystack.includes(term);
+    });
+  }, [products, search]);
 
   const handleCreate = async (event) => {
     event.preventDefault();
     setBanner({ message: "", isError: false });
+    setGenerating(true);
+    const payload = {
+      title: form.title.trim(),
+      edition: form.edition.trim(),
+      price: form.price,
+      condition: form.condition.trim(),
+      authors: form.authors.trim(),
+    };
     try {
-      const res = await fetch("/api/products", {
+      const res = await fetch("/api/products/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (!res.ok) {
         throw new Error(data.message || "Unable to create listing.");
       }
-      setBanner({ message: "Listing created successfully.", isError: false });
+      setBanner({ message: "Listing generated successfully.", isError: false });
       setShowForm(false);
       setForm({
-        name: "",
+        title: "",
+        edition: "",
         price: "",
-        shortDescription: "",
-        description: "",
-        headline: "",
-        image: "",
-        specs: "",
+        condition: "",
+        authors: "",
       });
       router.replace(router.asPath);
     } catch (error) {
       setBanner({ message: error.message, isError: true });
       setShowForm(true);
+    } finally {
+      setGenerating(false);
     }
   };
 
@@ -97,7 +119,7 @@ export default function Products({ products, currentUser, cartCount: count }) {
     >
       <div className="space-y-6">
         <div className="space-y-2">
-          <p className="text-sm font-semibold text-accent-100">
+          <p className="text-sm font-semibold text-sky-700">
             Browse the catalog
           </p>
           <h1 className="text-3xl font-bold text-slate-900">Available textbooks</h1>
@@ -105,13 +127,28 @@ export default function Products({ products, currentUser, cartCount: count }) {
             Each listing is verified before it goes live. Reserve a title, pick
             it up at Fiterman Hall, and return it when you're done.
           </p>
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <label className="flex w-full max-w-lg items-center gap-3">
+              <span className="label shrink-0">Search</span>
+              <input
+                className="input"
+                type="search"
+                placeholder="Search by title, description, or specs"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </label>
+            <span className="text-sm text-slate-600">
+              Showing {filteredProducts.length} of {products.length}
+            </span>
+          </div>
         </div>
         <MessageBanner message={banner.message} isError={banner.isError} />
 
         <div className="card card-lift space-y-4 p-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-100">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">
                 List a textbook
               </p>
               <h2 className="text-lg font-semibold text-slate-900">
@@ -127,118 +164,109 @@ export default function Products({ products, currentUser, cartCount: count }) {
             </button>
           </div>
           {showForm && (
-            <form className="grid gap-4 md:grid-cols-2" onSubmit={handleCreate}>
-              <div className="space-y-3">
-                <label className="label">
-                  Title
-                  <input
-                    className="input mt-1"
-                    type="text"
-                    name="name"
-                    required
-                    value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  />
-                </label>
-                <label className="label">
-                  Price (USD)
-                  <input
-                    className="input mt-1"
-                    type="number"
-                    name="price"
-                    min="0.01"
-                    step="0.01"
-                    required
-                    value={form.price}
-                    onChange={(e) => setForm({ ...form, price: e.target.value })}
-                  />
-                </label>
-                <label className="label">
-                  Headline
-                  <input
-                    className="input mt-1"
-                    type="text"
-                    name="headline"
-                    maxLength="140"
-                    placeholder="Quick one-liner"
-                    required
-                    value={form.headline}
-                    onChange={(e) =>
-                      setForm({ ...form, headline: e.target.value })
-                    }
-                  />
-                </label>
-                <label className="label">
-                  Image URL
-                  <input
-                    className="input mt-1"
-                    type="url"
-                    name="image"
-                    placeholder="https://example.com/cover.jpg"
-                    required
-                    value={form.image}
-                    onChange={(e) => setForm({ ...form, image: e.target.value })}
-                  />
-                </label>
-              </div>
-              <div className="space-y-3">
-                <label className="label">
-                  Short description
-                  <textarea
-                    className="input mt-1 min-h-[64px]"
-                    name="shortDescription"
-                    rows="2"
-                    maxLength="180"
-                    required
-                    value={form.shortDescription}
-                    onChange={(e) =>
-                      setForm({ ...form, shortDescription: e.target.value })
-                    }
-                  />
-                </label>
-                <label className="label">
-                  Full description
-                  <textarea
-                    className="input mt-1 min-h-[96px]"
-                    name="description"
-                    rows="3"
-                    required
-                    value={form.description}
-                    onChange={(e) =>
-                      setForm({ ...form, description: e.target.value })
-                    }
-                  />
-                </label>
-                <label className="label">
-                  Specs (one per line)
-                  <textarea
-                    className="input mt-1 min-h-[72px]"
-                    name="specs"
-                    rows="3"
-                    placeholder="ISBN, Edition, Condition"
-                    value={form.specs}
-                    onChange={(e) => setForm({ ...form, specs: e.target.value })}
-                  />
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  <button type="submit" className="btn-primary">
-                    Create listing
-                  </button>
-                  <button
-                    type="button"
-                    className="btn-ghost"
-                    onClick={() => setShowForm(false)}
-                  >
-                    Cancel
-                  </button>
+            <div className="relative">
+              {generating && (
+                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 rounded-3xl bg-white/70 backdrop-blur-sm">
+                  <div className="h-10 w-10 animate-spin rounded-full border-4 border-sky-200 border-t-sky-600" />
+                  <p className="text-sm font-semibold text-slate-800">
+                    Generating listing with OpenAI…
+                  </p>
                 </div>
-              </div>
-            </form>
+              )}
+              <form
+                className={`grid gap-4 md:grid-cols-2 ${generating ? "pointer-events-none blur-sm" : ""}`}
+                onSubmit={handleCreate}
+              >
+                <div className="space-y-3">
+                  <label className="label">
+                    Title *
+                    <input
+                      className="input mt-1"
+                      type="text"
+                      name="title"
+                      required
+                      value={form.title}
+                      onChange={(e) =>
+                        setForm({ ...form, title: e.target.value })
+                      }
+                    />
+                  </label>
+                  <label className="label">
+                    Edition *
+                    <input
+                      className="input mt-1"
+                      type="text"
+                      name="edition"
+                      required
+                      value={form.edition}
+                      onChange={(e) =>
+                        setForm({ ...form, edition: e.target.value })
+                      }
+                    />
+                  </label>
+                  <label className="label">
+                    Price (USD) *
+                    <input
+                      className="input mt-1"
+                      type="number"
+                      name="price"
+                      min="0.01"
+                      step="0.01"
+                      required
+                      value={form.price}
+                      onChange={(e) =>
+                        setForm({ ...form, price: e.target.value })
+                      }
+                    />
+                  </label>
+                </div>
+                <div className="space-y-3">
+                  <label className="label">
+                    Condition
+                    <input
+                      className="input mt-1"
+                      type="text"
+                      name="condition"
+                      placeholder="e.g., Good, highlights, no tears"
+                      value={form.condition}
+                      onChange={(e) =>
+                        setForm({ ...form, condition: e.target.value })
+                      }
+                    />
+                  </label>
+                  <label className="label">
+                    Authors
+                    <input
+                      className="input mt-1"
+                      type="text"
+                      name="authors"
+                      placeholder="Separate with commas"
+                      value={form.authors}
+                      onChange={(e) =>
+                        setForm({ ...form, authors: e.target.value })
+                      }
+                    />
+                  </label>
+                  <div className="flex flex-wrap gap-2 pt-2">
+                    <button type="submit" className="btn-primary">
+                      Generate listing
+                    </button>
+                    <button
+                      type="button"
+                      className="btn-ghost"
+                      onClick={() => setShowForm(false)}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
           )}
         </div>
 
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 stagger-children">
-          {products.map((product) => {
+          {filteredProducts.map((product) => {
             const qty = quantities[product.id] || 1;
             return (
               <div className="card flex h-full flex-col" key={product.id}>
@@ -255,7 +283,7 @@ export default function Products({ products, currentUser, cartCount: count }) {
                 </a>
                 <div className="flex flex-1 flex-col gap-3 p-4">
                   <div>
-                    <p className="text-xs uppercase tracking-[0.2em] text-accent-100">
+                    <p className="text-xs uppercase tracking-[0.2em] text-sky-700">
                       ${product.price.toFixed(2)}
                     </p>
                     <h3 className="text-lg font-semibold text-slate-900">

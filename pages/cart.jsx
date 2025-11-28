@@ -110,7 +110,7 @@ export default function Cart({
     >
       <div className="space-y-6">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-accent-100">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-sky-700">
             Shopping cart
           </p>
           <h1 className="text-3xl font-bold text-slate-900">Your items</h1>
@@ -119,7 +119,7 @@ export default function Cart({
         {cartState.items.length === 0 ? (
           <p className="text-slate-600">
             Your cart is empty. Browse the{" "}
-            <Link href="/products" className="text-accent-100 underline">
+            <Link href="/products" className="text-sky-700 underline">
               catalog
             </Link>{" "}
             to add items.
@@ -135,7 +135,7 @@ export default function Cart({
                   <div>
                     <Link
                       href={`/products/${item.productId}`}
-                      className="text-lg font-semibold text-slate-900"
+                      className="text-lg font-semibold text-slate-900 leading-tight line-clamp-2"
                     >
                       {item.name}
                     </Link>
@@ -178,7 +178,7 @@ export default function Cart({
                 </div>
               ))}
             </div>
-            <div className="card card-lift space-y-3 p-5">
+            <div className="card card-lift flex h-full flex-col space-y-3 p-5">
               <h2 className="text-lg font-semibold text-slate-900">Order summary</h2>
               <div className="space-y-1 text-sm text-slate-700">
                 <p>Subtotal: ${totalsState.subtotal.toFixed(2)}</p>
@@ -188,7 +188,7 @@ export default function Cart({
                 </p>
               </div>
               <form onSubmit={handleCheckout}>
-                <button type="submit" className="btn-primary w-full">
+                <button type="submit" className="btn-primary mt-auto w-full">
                   Checkout
                 </button>
               </form>

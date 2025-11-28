@@ -67,7 +67,7 @@ export default function Register() {
             className={`rounded-xl border px-4 py-3 text-sm ${
               status.isError
                 ? "border-red-400 bg-red-500/10 text-red-100"
-                : "border-accent-500/50 bg-accent-600/10 text-accent-100"
+                : "border-accent-500/50 bg-accent-600/10 text-sky-700"
             }`}
           >
             {status.message}
@@ -115,7 +115,7 @@ export default function Register() {
         </form>
         <p className="text-sm text-slate-300">
           Already registered?{" "}
-          <Link className="text-accent-100 underline" href="/login">
+          <Link className="text-sky-700 underline" href="/login">
             Log in
           </Link>
         </p>

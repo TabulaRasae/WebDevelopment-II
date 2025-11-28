@@ -22,7 +22,7 @@ const Hero = () => (
     <div className="relative flex min-h-[560px] items-center md:min-h-[680px]">
       <div className="page-shell">
         <div className="glass-panel max-w-3xl rounded-3xl p-8 md:p-10 animate-soft-fade">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-accent-100">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-sky-700">
             Campus verified · Always in rotation
           </p>
           <h1 className="mt-3 text-4xl font-bold leading-tight text-slate-900 md:text-5xl">
@@ -96,7 +96,7 @@ export default function Layout({
       <Head>
         <title>{title}</title>
       </Head>
-      <div className="min-h-screen bg-[radial-gradient(circle_at_10%_18%,rgba(56,189,248,0.26),transparent_28%),radial-gradient(circle_at_86%_12%,rgba(252,211,77,0.2),transparent_32%),radial-gradient(circle_at_50%_90%,rgba(99,102,241,0.18),transparent_38%),linear-gradient(180deg,#f7faff,#eef6ff)] text-slate-900">
+      <div className="flex min-h-screen flex-col bg-[radial-gradient(circle_at_10%_18%,rgba(56,189,248,0.26),transparent_28%),radial-gradient(circle_at_86%_12%,rgba(252,211,77,0.2),transparent_32%),radial-gradient(circle_at_50%_90%,rgba(99,102,241,0.18),transparent_38%),linear-gradient(180deg,#f7faff,#eef6ff)] text-slate-900">
         {!hideNav && (
           <header className="border-b border-slate-200/80 bg-white/70 backdrop-blur-xl">
             <div className="page-shell flex items-center justify-between py-4">
@@ -171,7 +171,7 @@ export default function Layout({
             </div>
           </header>
         )}
-        <main className="page-shell space-y-10 pt-8">
+        <main className="page-shell space-y-10 pt-8 flex-1">
           {!hideNav && !hideHero && <Hero />}
           <div>{children}</div>
         </main>

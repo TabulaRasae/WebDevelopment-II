@@ -15,7 +15,9 @@ export default function ProductCard({ product, redirectOnAdd = "/cart" }) {
       </div>
       <div className="flex flex-1 flex-col gap-3 p-4">
         <div>
-          <h3 className="text-lg font-semibold text-slate-900">{product.name}</h3>
+          <h3 className="text-lg font-semibold text-slate-900 leading-tight line-clamp-2 min-h-[48px]">
+            {product.name}
+          </h3>
           <p className="mt-1 text-sm text-slate-600">
             {product.shortDescription}
           </p>
@@ -23,7 +25,7 @@ export default function ProductCard({ product, redirectOnAdd = "/cart" }) {
         <div className="flex items-center justify-between text-sm font-semibold text-slate-900">
           <span>${product.price.toFixed(2)}</span>
           <Link
-            className="text-accent-100 underline decoration-accent-500"
+            className="text-sky-700 underline decoration-accent-500"
             href={`/products/${product.id}`}
           >
             Details

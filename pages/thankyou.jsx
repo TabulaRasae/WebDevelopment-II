@@ -32,7 +32,7 @@ export default function ThankYou({ currentUser }) {
       title="Thank You | BMCC UsedBooks Store"
     >
       <div className="card card-lift space-y-3 p-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-accent-100">
+        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-sky-700">
           Order confirmed
         </p>
         <h1 className="text-3xl font-bold text-slate-900">Thank you for supporting the exchange!</h1>

@@ -1,6 +1,7 @@
 {
   "scripts": {
     "dev": "next dev --turbo",
+    "dev:nodemon": "nodemon --config nodemon.json",
     "build": "next build",
     "start": "next start",
     "seed": "node database/seed.js"

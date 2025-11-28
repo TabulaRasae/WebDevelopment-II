@@ -62,7 +62,7 @@
   }
 
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-sky-400 via-cyan-300 to-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-sky-200/60 transition hover:-translate-y-[1px] hover:shadow-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 via-sky-600 to-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-sky-200/60 transition hover:-translate-y-[1px] hover:shadow-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400;
   }
 
   .btn-ghost {
@@ -78,7 +78,7 @@
   }
 
   .badge {
-    @apply inline-flex items-center rounded-full border border-sky-200 bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-800;
+    @apply inline-flex items-center rounded-full border border-sky-300 bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-800;
   }
 
   .pill {
@@ -129,6 +129,13 @@
   }
   .stagger-children > *:nth-child(7) {
     animation-delay: 360ms;
+  }
+
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 }
 

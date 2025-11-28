@@ -143,7 +143,7 @@ export default function ProductDetail({
       <div className="space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-accent-100">
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-sky-700">
               {productState.headline}
             </p>
             <h1 className="text-3xl font-bold text-slate-900">{productState.name}</h1>
@@ -197,7 +197,7 @@ export default function ProductDetail({
           <div className="card card-lift space-y-4 p-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.25em] text-accent-100">
+                <p className="text-xs font-semibold uppercase tracking-[0.25em] text-sky-700">
                   Manage listing
                 </p>
                 <h3 className="text-lg font-semibold text-slate-900">Edit or delete this book</h3>

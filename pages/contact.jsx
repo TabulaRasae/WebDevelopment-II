@@ -29,7 +29,7 @@ export default function Contact({ currentUser, cartCount: count }) {
     >
       <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
         <div className="space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-accent-100">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-sky-700">
             Contact &amp; Support
           </p>
           <h1 className="text-3xl font-bold text-slate-900">We’re here to help</h1>

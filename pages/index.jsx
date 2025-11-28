@@ -44,11 +44,11 @@ export default function Home({
     >
       <div className="space-y-6">
         <div className="space-y-2">
-          <p className="text-sm font-semibold text-accent-100">
+          <p className="text-sm font-semibold text-sky-700">
             Welcome back, {currentUser}
           </p>
           <h2 className="text-3xl font-bold text-slate-900">Your textbook dashboard</h2>
-          <p className="text-slate-600">
+          <p className="text-slate-700">
             New arrivals, quick cart snapshot, and support from the Student
             Activities Book Committee—all in one place.
           </p>
@@ -85,7 +85,7 @@ export default function Home({
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-semibold text-slate-900">Featured textbooks</h3>
-            <Link className="text-sm text-accent-100" href="/products">
+            <Link className="text-sm text-sky-700" href="/products">
               View all
             </Link>
           </div>

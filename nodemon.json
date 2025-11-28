@@ -1,0 +1,7 @@
+{
+  "watch": ["pages", "components", "lib", "styles", "database", "next.config.mjs"],
+  "ext": "js,jsx,css,mjs,json",
+  "ignore": [".next", "node_modules", "public"],
+  "exec": "next dev --turbo",
+  "delay": "1200"
+}

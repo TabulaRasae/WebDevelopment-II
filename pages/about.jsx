@@ -28,7 +28,7 @@ export default function About({ currentUser, cartCount: count }) {
     >
       <div className="space-y-6">
         <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-accent-100">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-sky-700">
             Student-led program
           </p>
           <h1 className="text-3xl font-bold text-slate-900">About the program</h1>
@@ -73,7 +73,7 @@ export default function About({ currentUser, cartCount: count }) {
               />
               <div className="space-y-2 p-4">
                 <h3 className="text-lg font-semibold text-slate-900">{member.name}</h3>
-                <p className="text-sm text-accent-100">{member.role}</p>
+                <p className="text-sm text-sky-700">{member.role}</p>
                 <p className="text-sm text-slate-600">{member.copy}</p>
               </div>
             </div>
