@@ -7,9 +7,9 @@ import { cartCount, getCartSnapshot } from "../../lib/cart";
 import connectDB from "../../lib/db";
 import { fetchProductBySlug } from "../../lib/products";
 import { withSessionSsr } from "../../lib/session";
-import { storage } from "../../lib/firebase";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { compressImage } from "../../lib/imageCompression";
+import { uploadImagesToSupabase } from "../../lib/supabaseStorage";
+import { deleteSupabaseImages } from "../../lib/supabaseStorage";
 
 export const getServerSideProps = withSessionSsr(async ({ req, params }) => {
   if (!req.session?.userId) {
@@ -21,7 +21,8 @@ export const getServerSideProps = withSessionSsr(async ({ req, params }) => {
   const slug = params.productId;
   await connectDB();
   const product = await fetchProductBySlug(slug);
-  const isAvailable = product && (!product.status || product.status === "available");
+  const isAvailable =
+    product && (!product.status || product.status === "available");
   if (!product || !isAvailable) {
     return { notFound: true };
   }
@@ -108,37 +109,28 @@ export default function ProductDetail({
     }
     if (editImageFiles.length) {
       try {
-        uploadedImages = [];
+        const compressedFiles = [];
         for (const file of editImageFiles) {
-          const compressed = await compressImage(file);
-          const storageRef = ref(storage, `listings/${Date.now()}-${file.name}`);
-          const uploadTask = uploadBytesResumable(storageRef, compressed);
-
-          await new Promise((resolve, reject) => {
-            uploadTask.on(
-              "state_changed",
-              () => {},
-              (error) => {
-                console.error("Image upload failed", {
-                  file: file.name,
-                  code: error.code,
-                  message: error.message,
-                });
-                reject(error);
-              },
-              () => resolve()
-            );
-          });
-
-          const url = await getDownloadURL(storageRef);
-          uploadedImages.push(url);
+          const compressed = await compressImage(file, { maxBytes: 380 * 1024 });
+          compressedFiles.push(compressed);
         }
+        const uploads = await uploadImagesToSupabase(compressedFiles);
+        uploadedImages = uploads.map((item) => item.url);
       } catch (error) {
         setMessage({
-          text: `Image upload failed: ${error?.code || error?.message || "Unknown error"}`,
+          text: `Image upload failed: ${error?.message || "Unknown error"}`,
           isError: true,
         });
         return;
+      }
+    }
+
+    if (uploadedImages.length) {
+      try {
+        await deleteSupabaseImages(productState.images || []);
+      } catch (cleanupError) {
+        // eslint-disable-next-line no-console
+        console.warn("Failed to delete previous images from Supabase", cleanupError);
       }
     }
 
@@ -202,7 +194,9 @@ export default function ProductDetail({
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-sky-700">
               {productState.headline}
             </p>
-            <h1 className="text-3xl font-bold text-slate-900">{productState.name}</h1>
+            <h1 className="text-3xl font-bold text-slate-900">
+              {productState.name}
+            </h1>
           </div>
           <Link className="btn-ghost" href="/products">
             Back to products
@@ -224,7 +218,9 @@ export default function ProductDetail({
           <div className="card card-lift space-y-4 p-6">
             <div className="flex items-center justify-between">
               <span className="badge">Used textbook</span>
-              <span className="text-lg font-semibold text-slate-900">${productState.price.toFixed(2)}</span>
+              <span className="text-lg font-semibold text-slate-900">
+                ${productState.price.toFixed(2)}
+              </span>
             </div>
             <p className="text-slate-700">{productState.description}</p>
             <div className="flex flex-wrap gap-2">
@@ -249,7 +245,9 @@ export default function ProductDetail({
                 <p className="text-xs font-semibold uppercase tracking-[0.25em] text-sky-700">
                   Manage listing
                 </p>
-                <h3 className="text-lg font-semibold text-slate-900">Edit or delete this book</h3>
+                <h3 className="text-lg font-semibold text-slate-900">
+                  Edit or delete this book
+                </h3>
               </div>
               <div className="flex flex-wrap gap-2">
                 <button
@@ -271,7 +269,10 @@ export default function ProductDetail({
             </div>
 
             {showEdit && (
-              <form className="grid gap-4 md:grid-cols-2" onSubmit={handleUpdate}>
+              <form
+                className="grid gap-4 md:grid-cols-2"
+                onSubmit={handleUpdate}
+              >
                 <div className="space-y-3">
                   <label className="label">
                     Title
@@ -330,17 +331,32 @@ export default function ProductDetail({
                   </label>
                   <label className="label">
                     Upload new photos (optional)
-                    <input
-                      className="input mt-1"
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      onChange={(e) =>
-                        setEditImageFiles(Array.from(e.target.files || []))
-                      }
-                    />
+                    <div className="mt-1 flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200 bg-gradient-to-r from-slate-50 to-white px-4 py-3 shadow-inner">
+                      <input
+                        className="sr-only"
+                        id="edit-photo-upload"
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={(e) =>
+                          setEditImageFiles(Array.from(e.target.files || []))
+                        }
+                      />
+                      <label
+                        htmlFor="edit-photo-upload"
+                        className="btn-ghost w-full max-w-xs justify-center rounded-full border border-dashed border-sky-300 bg-white text-sky-700 hover:border-sky-400 hover:bg-sky-50"
+                      >
+                        Add files
+                      </label>
+                      {editImageFiles.length > 0 && (
+                        <span className="text-xs font-semibold text-slate-700">
+                          {editImageFiles.length} selected
+                        </span>
+                      )}
+                    </div>
                     <p className="text-xs text-slate-500">
-                      Uploading replaces images if provided; first photo becomes the cover.
+                      Uploading replaces images if provided; first photo becomes
+                      the cover.
                     </p>
                   </label>
                 </div>

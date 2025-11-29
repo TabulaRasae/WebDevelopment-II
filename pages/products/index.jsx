@@ -7,9 +7,8 @@ import { cartCount, getCartSnapshot } from "../../lib/cart";
 import connectDB from "../../lib/db";
 import { fetchProducts } from "../../lib/products";
 import { withSessionSsr } from "../../lib/session";
-import { storage } from "../../lib/firebase";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { compressImage } from "../../lib/imageCompression";
+import { uploadImagesToSupabase, deleteSupabaseImages } from "../../lib/supabaseStorage";
 
 export const getServerSideProps = withSessionSsr(async ({ req }) => {
   if (!req.session?.userId) {
@@ -85,34 +84,16 @@ export default function Products({ products, currentUser, cartCount: count }) {
     let uploadedImages = [];
     if (imageFiles.length) {
       try {
-        uploadedImages = [];
+        const compressedFiles = [];
         for (const file of imageFiles) {
-          const compressed = await compressImage(file);
-          const storageRef = ref(storage, `listings/${Date.now()}-${file.name}`);
-          const uploadTask = uploadBytesResumable(storageRef, compressed);
-
-          await new Promise((resolve, reject) => {
-            uploadTask.on(
-              "state_changed",
-              () => {},
-              (error) => {
-                console.error("Image upload failed", {
-                  file: file.name,
-                  code: error.code,
-                  message: error.message,
-                });
-                reject(error);
-              },
-              () => resolve()
-            );
-          });
-
-          const url = await getDownloadURL(storageRef);
-          uploadedImages.push(url);
+          const compressed = await compressImage(file, { maxBytes: 380 * 1024 });
+          compressedFiles.push(compressed);
         }
+        const uploads = await uploadImagesToSupabase(compressedFiles);
+        uploadedImages = uploads.map((item) => item.url);
       } catch (error) {
         setBanner({
-          message: `Image upload failed: ${error?.code || error?.message || "Unknown error"}`,
+          message: `Image upload failed: ${error?.message || "Unknown error"}`,
           isError: true,
         });
         setGenerating(false);
@@ -137,6 +118,9 @@ export default function Products({ products, currentUser, cartCount: count }) {
       });
       const data = await res.json();
       if (!res.ok) {
+        if (uploadedImages.length) {
+          deleteSupabaseImages(uploadedImages).catch(() => {});
+        }
         throw new Error(data.message || "Unable to create listing.");
       }
       setBanner({ message: "Listing generated successfully.", isError: false });
@@ -297,19 +281,30 @@ export default function Products({ products, currentUser, cartCount: count }) {
                   </label>
                   <label className="label">
                     Photos (optional)
-                    <input
-                      className="input mt-1"
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      onChange={(e) => setImageFiles(Array.from(e.target.files || []))}
-                    />
+                    <div className="mt-1 flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200 bg-gradient-to-r from-slate-50 to-white px-4 py-3 shadow-inner">
+                      <input
+                        className="sr-only"
+                        id="create-photo-upload"
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={(e) => setImageFiles(Array.from(e.target.files || []))}
+                      />
+                      <label
+                        htmlFor="create-photo-upload"
+                        className="btn-ghost w-full max-w-xs justify-center rounded-full border border-dashed border-sky-300 bg-white text-sky-700 hover:border-sky-400 hover:bg-sky-50"
+                      >
+                        Add files
+                      </label>
+                      {imageFiles.length > 0 && (
+                        <span className="text-xs font-semibold text-slate-700">
+                          {imageFiles.length} selected
+                        </span>
+                      )}
+                    </div>
                     <p className="text-xs text-slate-500">
                       Upload multiple images; first image becomes the cover. If none are uploaded, a cover will be generated.
                     </p>
-                    {imageFiles.length > 0 && (
-                      <p className="text-xs text-slate-600">{imageFiles.length} file(s) selected.</p>
-                    )}
                   </label>
                   <div className="flex flex-wrap gap-2 pt-2">
                     <button type="submit" className="btn-primary">
