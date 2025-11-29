@@ -8,11 +8,11 @@ export default function ProductCard({ product, redirectOnAdd = "/cart" }) {
       : product.image;
   return (
     <div className="card card-lift reveal-up flex h-full flex-col overflow-hidden">
-      <div className="relative aspect-[3/4] overflow-hidden">
+      <div className="relative aspect-[5/7] max-h-80 overflow-hidden bg-slate-100">
         <img
           src={primaryImage}
           alt={product.name}
-          className="h-full w-full object-cover transition duration-300 hover:scale-105"
+          className="h-full w-full object-contain p-3 transition duration-300 hover:scale-105"
           loading="lazy"
         />
         <span className="absolute left-3 top-3 badge">Used textbook</span>
@@ -35,10 +35,13 @@ export default function ProductCard({ product, redirectOnAdd = "/cart" }) {
             Details
           </Link>
         </div>
-        <AddToCartButton
-          productId={product.id}
-          redirect={redirectOnAdd}
-        />
+        <div className="mt-auto">
+          <AddToCartButton
+            productId={product.id}
+            redirect={redirectOnAdd}
+            className="w-full justify-center"
+          />
+        </div>
       </div>
     </div>
   );

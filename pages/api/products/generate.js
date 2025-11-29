@@ -208,6 +208,21 @@ const searchOpenLibraryByTitle = async ({ title, edition, authors }) => {
   return { image: "", isbn: "", authors: "" };
 };
 
+const tryOpenLibraryCover = async (isbn = "") => {
+  const normalized = normalizeIsbn(isbn);
+  if (!normalized) return "";
+  const url = sanitizeCoverImage(
+    `https://covers.openlibrary.org/b/isbn/${normalized}-L.jpg`
+  );
+  if (!url) return "";
+  try {
+    const valid = await validateImageUrl(url);
+    return valid || "";
+  } catch {
+    return "";
+  }
+};
+
 async function generateRoute(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ message: "Method not allowed" });

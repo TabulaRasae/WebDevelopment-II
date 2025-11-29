@@ -334,7 +334,7 @@ export default function Products({ products, currentUser, cartCount: count }) {
             return (
               <div className="card flex h-full flex-col" key={product.id}>
                 <a
-                  className="relative block aspect-[3/4] overflow-hidden"
+                  className="relative block aspect-[5/7] max-h-80 overflow-hidden bg-slate-100"
                   href={`/products/${product.id}`}
                 >
                   <img
@@ -344,7 +344,7 @@ export default function Products({ products, currentUser, cartCount: count }) {
                         : product.image
                     }
                     alt={product.name}
-                    className="h-full w-full object-cover transition duration-300 hover:scale-105"
+                    className="h-full w-full object-contain p-3 transition duration-300 hover:scale-105"
                     loading="lazy"
                   />
                 </a>
@@ -371,6 +371,7 @@ export default function Products({ products, currentUser, cartCount: count }) {
                     <AddToCartButton
                       productId={product.id}
                       redirect="/products"
+                      className="btn-primary w-full justify-center"
                     >
                       Add to Cart - ${priceLabels[product.id]}
                     </AddToCartButton>
