@@ -1,6 +1,7 @@
 import connectDB from "../../../lib/db";
 import Order from "../../../database/models/Order";
 import { getUserId, withSessionRoute } from "../../../lib/session";
+import { withCors } from "../../../lib/cors";
 
 async function orderRoute(req, res) {
   const userId = getUserId(req);
@@ -33,4 +34,4 @@ async function orderRoute(req, res) {
   return res.status(405).json({ message: "Unsupported action." });
 }
 
-export default withSessionRoute(orderRoute);
+export default withCors(withSessionRoute(orderRoute));
