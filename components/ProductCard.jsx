@@ -2,11 +2,15 @@ import Link from "next/link";
 import AddToCartButton from "./AddToCartButton";
 
 export default function ProductCard({ product, redirectOnAdd = "/cart" }) {
+  const primaryImage =
+    Array.isArray(product.images) && product.images.length
+      ? product.images[0]
+      : product.image;
   return (
     <div className="card card-lift reveal-up flex h-full flex-col overflow-hidden">
       <div className="relative aspect-[3/4] overflow-hidden">
         <img
-          src={product.image}
+          src={primaryImage}
           alt={product.name}
           className="h-full w-full object-cover transition duration-300 hover:scale-105"
           loading="lazy"
@@ -33,7 +37,6 @@ export default function ProductCard({ product, redirectOnAdd = "/cart" }) {
         </div>
         <AddToCartButton
           productId={product.id}
-          quantity={1}
           redirect={redirectOnAdd}
         />
       </div>

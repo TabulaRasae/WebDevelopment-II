@@ -10,7 +10,14 @@ const productSchema = new mongoose.Schema(
     headline: { type: String, required: true },
     specs: [{ type: String }],
     image: { type: String, required: true },
+    images: [{ type: String }],
     ownerId: { type: String, default: null },
+    status: {
+      type: String,
+      enum: ["available", "sold"],
+      default: "available",
+    },
+    soldAt: { type: Date, default: null },
   },
   { timestamps: true }
 );

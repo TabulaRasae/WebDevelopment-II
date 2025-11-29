@@ -17,7 +17,7 @@ export const getServerSideProps = withSessionSsr(async ({ req }) => {
   await connectDB();
   const [cart, featuredDocs] = await Promise.all([
     getCartSnapshot(req.session.userId),
-    Product.find().sort({ name: 1 }).limit(3).lean(),
+    Product.find({ $or: [{ status: { $exists: false } }, { status: "available" }] }).sort({ createdAt: -1 }).limit(3).lean(),
   ]);
 
   return {
@@ -84,7 +84,7 @@ export default function Home({
         </div>
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-xl font-semibold text-slate-900">Featured textbooks</h3>
+            <h3 className="text-xl font-semibold text-slate-900">Most recent additions</h3>
             <Link className="text-sm text-sky-700" href="/products">
               View all
             </Link>

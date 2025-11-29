@@ -1,6 +1,12 @@
 import connectDB from "../../../lib/db";
 import { createProduct } from "../../../lib/products";
 import { getUserId, withSessionRoute } from "../../../lib/session";
+import {
+  buildFallbackCover,
+  pickCoverImage,
+  sanitizeCoverImage,
+  validateImageUrl,
+} from "../../../lib/coverSelection.js";
 
 const OPENAI_MODEL =
   process.env.OPENAI_MODEL ||
@@ -16,11 +22,12 @@ Return a single JSON object with keys:
 - description: 3-5 sentences, under 450 chars, mention edition/condition/authors, include a likely BMCC course/subject this book supports (e.g., "Helpful for BMCC CIS 485 presentations") and include the ISBN if known.
 - image: direct https URL to a front cover photo of THIS title/edition (avoid placeholders, plants/objects/abstracts; if unsure, leave empty string). Use the provided title and edition in your lookup.
 - isbn: 13-digit ISBN string if confident, else empty string
+- authors: comma-separated author names; if not provided, infer the most likely authors for this title/edition. If unsure, leave empty string.
 - specs: array of short bullet-style strings (e.g., "Edition: 3rd", "Condition: Gently used", "Authors: ...")
 
 Input:
 - Title: ${title}
-- Edition: ${edition}
+- Edition: ${edition || "Not provided"}
 - Price: $${price}
 - Condition: ${condition || "Not provided"}
 - Authors: ${authors || "Not provided (infer likely authors if confident)"}
@@ -42,39 +49,33 @@ const extractJson = (rawText = "") => {
 const getOpenAIKey = () =>
   process.env.OPENAI_API_KEY || process.env.OPENAI_KEY || process.env.OPEN || "";
 
-async function generateWithOpenAI(payload) {
+async function requestCoverOnly({ title, edition, authors }) {
   const apiKey = getOpenAIKey();
-  if (!apiKey) {
-    throw new Error("Missing OpenAI API key.");
+  if (!apiKey) return "";
+
+  const body = {
+    model: OPENAI_MODEL,
+    messages: [
+      {
+        role: "system",
+        content:
+          "Return only a direct https image URL to the front cover for the exact title/edition provided. If unsure, return an empty string.",
+      },
+      {
+        role: "user",
+        content: `Title: ${title}\nEdition: ${edition}\nAuthors: ${authors || "Not provided"}\nRespond with ONLY the URL, nothing else.`,
+      },
+    ],
+    temperature: 0.2,
+  };
+
+  if (/gpt-5\.1|gpt-4\.1/i.test(OPENAI_MODEL)) {
+    body.max_completion_tokens = 50;
+  } else {
+    body.max_tokens = 50;
   }
 
-   const modelCandidates = [
-    OPENAI_MODEL
-  ].filter(Boolean);
-  let lastError = null;
-
-  for (const model of modelCandidates) {
-    const body = {
-      model,
-      messages: [
-        {
-          role: "system",
-          content:
-            "You write concise, accurate textbook listings and return strict JSON with no prose. Base every detail on the provided Title and Edition. Prefer trustworthy cover images that match the exact title/edition. If unsure about an image or ISBN, leave them empty.",
-        },
-        { role: "user", content: buildPrompt(payload) },
-      ],
-      temperature: 0.4,
-    };
-
-    // Newer models require max_completion_tokens instead of max_tokens
-    const usesCompletionTokens = /gpt-5\.1|gpt-4\.1/i.test(model);
-    if (usesCompletionTokens) {
-      body.max_completion_tokens = 400;
-    } else {
-      body.max_tokens = 400;
-    }
-
+  try {
     const res = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -83,94 +84,66 @@ async function generateWithOpenAI(payload) {
       },
       body: JSON.stringify(body),
     });
-
-    if (res.ok) {
-      const data = await res.json();
-      const content = data?.choices?.[0]?.message?.content || "";
-      if (!content) throw new Error("Empty response from OpenAI.");
-
-      try {
-        return JSON.parse(extractJson(content));
-      } catch (error) {
-        throw new Error("Unable to parse OpenAI response.");
-      }
-    }
-
-    const errorText = await res.text();
-    lastError = `OpenAI error for model ${model}: ${res.status} ${errorText}`;
-    const isModelNotFound =
-      res.status === 404 || /model_not_found|does not exist/i.test(errorText);
-    if (!isModelNotFound) {
-      throw new Error(lastError);
-    }
-    // otherwise try next candidate
+    if (!res.ok) return "";
+    const data = await res.json();
+    const url = (data?.choices?.[0]?.message?.content || "").trim();
+    return sanitizeCoverImage(url);
+  } catch {
+    return "";
   }
-
-  throw new Error(lastError || "No OpenAI model succeeded.");
 }
 
-const isLikelyImage = (url = "") => {
-  if (typeof url !== "string" || !url.startsWith("http")) return false;
-  try {
-    const parsed = new URL(url);
-    const path = parsed.pathname || "";
-    const hasExt = /\.(jpe?g|png|webp|gif)$/i.test(path);
-    const isGoogleImg =
-      parsed.host.includes("gstatic") ||
-      parsed.host.includes("googleusercontent") ||
-      parsed.host.includes("books.google");
-    const hasImgParam = parsed.search.includes("img=") || parsed.search.includes("zoom=");
-    return hasExt || isGoogleImg || hasImgParam;
-  } catch {
-    return false;
+async function generateWithOpenAI(payload) {
+  const apiKey = getOpenAIKey();
+  if (!apiKey) {
+    throw new Error("Missing OpenAI API key.");
   }
-};
 
-const sanitizeCoverImage = (url = "", title = "") => {
-  if (!isLikelyImage(url)) return "";
-  const lower = url.toLowerCase();
-  const banned = [
-    "cactus",
-    "succulent",
-    "plant",
-    "plants",
-    "desert",
-    "flower",
-    "flowers",
-    "vase",
-    "pot",
-    "potted",
-    "tree",
-    "trees",
-  ];
-  if (banned.some((word) => lower.includes(word))) return "";
-  const titleTerms = (title || "").toLowerCase().split(/\s+/).filter(Boolean);
-  const host = (() => {
-    try {
-      return new URL(url).host;
-    } catch {
-      return "";
-    }
-  })();
-  const titleMatches = titleTerms.length
-    ? titleTerms.some((term) => lower.includes(term))
-    : false;
-  const trustedHost =
-    host.includes("books.google") ||
-    host.includes("gstatic") ||
-    host.includes("googleusercontent") ||
-    host.includes("amazon.com") ||
-    host.includes("ssl-images-amazon.com") ||
-    host.includes("images-na.ssl-images-amazon.com");
+   const model = OPENAI_MODEL;
+  const body = {
+    model,
+    messages: [
+      {
+        role: "system",
+        content:
+          "You write concise, accurate textbook listings and return strict JSON with no prose. Base every detail on the provided Title and Edition. Prefer trustworthy cover images that match the exact title/edition; return a non-empty https image URL whenever possible and only leave it empty if absolutely necessary. Infer likely authors when not provided (leave blank if unsure). If unsure about an ISBN, leave it empty.",
+      },
+      { role: "user", content: buildPrompt(payload) },
+    ],
+    temperature: 0.4,
+  };
 
-  if (!titleMatches && !trustedHost) return "";
-  return url;
-};
+  const usesCompletionTokens = /gpt-5\.1|gpt-4\.1/i.test(model);
+  if (usesCompletionTokens) {
+    body.max_completion_tokens = 400;
+  } else {
+    body.max_tokens = 400;
+  }
 
-const buildFallbackCover = (title = "", edition = "") => {
-  const text = encodeURIComponent(`${title} ${edition}`.trim() || "BMCC UsedBooks");
-  return `https://placehold.co/600x800/0ea5e9/ffffff?text=${text}`;
-};
+  const res = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(`OpenAI error for model ${model}: ${res.status} ${errorText}`);
+  }
+
+  const data = await res.json();
+  const content = data?.choices?.[0]?.message?.content || "";
+  if (!content) throw new Error("Empty response from OpenAI.");
+
+  try {
+    return JSON.parse(extractJson(content));
+  } catch (error) {
+    throw new Error("Unable to parse OpenAI response.");
+  }
+}
 
 const normalizeIsbn = (value = "") => {
   const digits = value.replace(/[^0-9Xx]/g, "");
@@ -191,99 +164,47 @@ const ensureCourseAndIsbn = (description = "", title = "", isbn = "") => {
   return text.trim();
 };
 
-async function lookupBookCover({ title, edition, authors, isbn }) {
-  if (!process.env.GOOGLE_BOOKS_API_KEY) return { image: "", isbn: "", authors: "" };
-
-  const baseQuery = `${title} ${edition} ${authors || ""}`.trim();
-  const isbnQuery = isbn ? ` isbn:${isbn}` : "";
-  const query = encodeURIComponent(`${baseQuery}${isbnQuery}`);
-  const url = `https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=5&printType=books&projection=lite&key=${process.env.GOOGLE_BOOKS_API_KEY}`;
-
-  try {
-    const res = await fetch(url);
-    if (!res.ok) return { image: "", isbn: "" };
-    const data = await res.json();
-    const items = Array.isArray(data?.items) ? data.items : [];
-    for (const item of items) {
-      const links = item?.volumeInfo?.imageLinks || {};
-      const candidates = [
-        links.large,
-        links.medium,
-        links.thumbnail,
-        links.smallThumbnail,
-      ].filter(Boolean);
-      const match = candidates.find((u) => {
-        try {
-          const normalized = new URL(u.replace("http://", "https://")).toString();
-          const clean = sanitizeCoverImage(normalized, title);
-          return Boolean(clean);
-        } catch {
-          return false;
-        }
-      });
-      if (match) {
-        const sanitized = sanitizeCoverImage(
-          match.replace("http://", "https://"),
-          title
-        );
-        const identifiers = Array.isArray(item?.volumeInfo?.industryIdentifiers)
-          ? item.volumeInfo.industryIdentifiers
-          : [];
-        const isbnCandidate =
-          normalizeIsbn(
-            identifiers.find((i) => /isbn\s*13/i.test(i?.type || ""))?.identifier ||
-              ""
-          ) ||
-          normalizeIsbn(
-            identifiers.find((i) => /isbn/i.test(i?.type || ""))?.identifier || ""
-          );
-        const volumeAuthors = Array.isArray(item?.volumeInfo?.authors)
-          ? item.volumeInfo.authors.filter(Boolean).join(", ")
-          : "";
-        return { image: sanitized, isbn: isbnCandidate || "", authors: volumeAuthors };
-      }
-    }
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error("Book cover lookup failed:", error);
-    return { image: "", isbn: "", authors: "" };
+const dedupeSpecs = (specs = []) => {
+  const seen = new Set();
+  const result = [];
+  for (const spec of specs) {
+    const normalized = (spec || "").trim();
+    if (!normalized) continue;
+    const key = normalized.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    result.push(normalized);
   }
-
-  return { image: "", isbn: "", authors: "" };
-}
-
-const tryAmazonCover = async (isbn) => {
-  if (!isbn) return "";
-  const patterns = [
-    `https://images-na.ssl-images-amazon.com/images/P/${isbn}.01._SL1200_.jpg`,
-    `https://images-na.ssl-images-amazon.com/images/P/${isbn}.01._SX500_.jpg`,
-    `https://m.media-amazon.com/images/P/${isbn}.01._SL1200_.jpg`,
-    `https://m.media-amazon.com/images/P/${isbn}.01._SX500_.jpg`,
-  ];
-
-  for (const url of patterns) {
-    try {
-      const res = await fetch(url, { method: "HEAD" });
-      if (res.ok) {
-        return url;
-      }
-    } catch {
-      // ignore and continue
-    }
-  }
-  return "";
+  return result;
 };
 
-const tryOpenLibraryCover = async (isbn) => {
-  if (!isbn) return "";
-  const url = `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`;
+const searchOpenLibraryByTitle = async ({ title, edition, authors }) => {
+  const query = encodeURIComponent([title, edition, authors].filter(Boolean).join(" "));
+  const url = `https://openlibrary.org/search.json?q=${query}&fields=cover_i,isbn,author_name,title&limit=20`;
   try {
-    const res = await fetch(url, { method: "HEAD" });
-    if (res.ok) return url;
+    const res = await fetch(url);
+    if (!res.ok) return { image: "", isbn: "", authors: "" };
+    const data = await res.json();
+    const docs = Array.isArray(data?.docs) ? data.docs : [];
+    for (const doc of docs) {
+      const coverId = doc.cover_i;
+      const isbnCandidate = normalizeIsbn(
+        Array.isArray(doc.isbn) ? doc.isbn.find((v) => normalizeIsbn(v)) || "" : ""
+      );
+      const authorNames = Array.isArray(doc.author_name)
+        ? doc.author_name.filter(Boolean).join(", ")
+        : "";
+      const image = coverId
+        ? sanitizeCoverImage(`https://covers.openlibrary.org/b/id/${coverId}-L.jpg`)
+        : "";
+      if (image || isbnCandidate) {
+        return { image, isbn: isbnCandidate, authors: authorNames };
+      }
+    }
   } catch {
     // ignore
   }
-  return "";
+  return { image: "", isbn: "", authors: "" };
 };
 
 async function generateRoute(req, res) {
@@ -296,11 +217,12 @@ async function generateRoute(req, res) {
     return res.status(401).json({ message: "Login required." });
   }
 
-  const { title, edition, price, condition = "", authors = "" } = req.body || {};
-  if (!title || !edition || !price) {
+  const { title, edition = "", price, condition = "", authors = "" } = req.body || {};
+  const providedImages = Array.isArray(req.body?.images) ? req.body.images.filter(Boolean) : [];
+  if (!title || !price) {
     return res
       .status(400)
-      .json({ message: "Title, edition, and price are required." });
+      .json({ message: "Title and price are required." });
   }
 
   const priceNumber = Number(price);
@@ -336,52 +258,106 @@ async function generateRoute(req, res) {
   try {
     const fallbackImage = buildFallbackCover(title, edition);
     const aiIsbn = normalizeIsbn(ai?.isbn || "");
-    const amazonImage = await tryAmazonCover(aiIsbn);
-    const {
-      image: googleImage,
-      isbn: googleIsbn,
-      authors: googleAuthors,
-    } = await lookupBookCover({
+    const amazonImage = "";
+    const googleImage = "";
+    const googleIsbn = "";
+    const googleAuthors = "";
+    const aiImage = sanitizeCoverImage(ai?.image);
+    const openSearch = await searchOpenLibraryByTitle({
       title,
       edition,
-      authors,
-      isbn: aiIsbn,
+      authors: authors || googleAuthors || ai?.authors || "",
     });
-    const aiImage = sanitizeCoverImage(ai?.image, title);
-    const derivedIsbn = normalizeIsbn(aiIsbn || googleIsbn || "");
+    const derivedIsbn = normalizeIsbn(aiIsbn || googleIsbn || openSearch.isbn || "");
     const openLibraryImage = await tryOpenLibraryCover(derivedIsbn);
 
-    const resolvedAuthors = authors || googleAuthors || ai?.authors || "";
+    const resolvedAuthors =
+      authors || googleAuthors || openSearch.authors || ai?.authors || "";
 
     const specs = Array.isArray(ai?.specs) ? ai.specs.filter(Boolean) : [];
-    specs.unshift(`Edition: ${edition}`);
+    if (edition) specs.unshift(`Edition: ${edition}`);
     if (condition) specs.unshift(`Condition: ${condition}`);
     if (resolvedAuthors) specs.unshift(`Authors: ${resolvedAuthors}`);
     if (derivedIsbn) specs.unshift(`ISBN: ${derivedIsbn}`);
+    const uniqueSpecs = dedupeSpecs(specs);
 
     const baseDescription =
       ai?.description?.slice(0, 600) ||
-      `Used textbook titled ${title} (${edition}). Condition: ${condition ||
-        "Used"}. Authors: ${resolvedAuthors || "N/A"}.`;
+      [
+        `Used textbook titled ${title}${edition ? ` (${edition})` : ""}.`,
+        `Condition: ${condition || "Used"}.`,
+        resolvedAuthors ? `Authors: ${resolvedAuthors}.` : "",
+      ]
+        .filter(Boolean)
+        .join(" ");
     const description = ensureCourseAndIsbn(baseDescription, title, derivedIsbn);
 
+    const providedImageList = providedImages.map((u) => sanitizeCoverImage(u));
+    const candidates = [
+      ...providedImageList.map((url) => ({ label: "user", url })),
+      { label: "google", url: googleImage },
+      { label: "openLibrary", url: openLibraryImage },
+      { label: "openSearch", url: openSearch.image },
+      { label: "ai", url: aiImage },
+    ];
+
+    const providedImageList = providedImages.map((u) => sanitizeCoverImage(u)).filter(Boolean);
+    let image = "";
+    for (const { url } of candidates) {
+      const valid = await validateImageUrl(url);
+      if (valid) {
+        image = valid;
+        break;
+      }
+    }
+
+    if (!image) {
+      const coverFromModel = await requestCoverOnly({
+        title,
+        edition,
+        authors: resolvedAuthors,
+      });
+      const fallbackCandidates = [
+        { label: "modelCover", url: coverFromModel },
+        ...candidates,
+      ];
+      for (const { url } of fallbackCandidates) {
+        const valid = await validateImageUrl(url);
+        if (valid) {
+          image = valid;
+          break;
+        }
+      }
+    }
+
+    if (!image && providedImageList.length) {
+      image = providedImageList[0];
+    }
+
+    if (!image) {
+      image = fallbackImage;
+    }
+
+    const displayName = edition ? `${title} (${edition})` : title;
+
+    const imageList = providedImageList.length
+      ? providedImageList
+      : [image, openLibraryImage, openSearch.image, aiImage].filter(Boolean);
+
     const product = await createProduct({
-      name: `${title} (${edition})`,
+      name: displayName,
       price: priceNumber,
       shortDescription:
         ai?.shortDescription?.slice(0, 200) ||
-        `${title} ${edition} edition textbook.`,
+        `${title}${edition ? ` ${edition} edition` : ""} textbook.`,
       description,
       headline:
         ai?.headline?.slice(0, 90) ||
-        `${title} ${edition} edition for your course`,
-      image:
-        amazonImage ||
-        googleImage ||
-        openLibraryImage ||
-        aiImage ||
-        fallbackImage,
-      specs,
+        `${title}${edition ? ` ${edition} edition` : ""} for your course`,
+      image: image || fallbackImage,
+      images: imageList.length ? imageList : [fallbackImage],
+      specs: uniqueSpecs,
+      status: "available",
       ownerId: userId,
     });
 

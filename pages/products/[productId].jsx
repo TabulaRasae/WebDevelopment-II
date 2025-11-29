@@ -1,12 +1,15 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Layout from "../../components/Layout";
 import MessageBanner from "../../components/MessageBanner";
 import { cartCount, getCartSnapshot } from "../../lib/cart";
 import connectDB from "../../lib/db";
 import { fetchProductBySlug } from "../../lib/products";
 import { withSessionSsr } from "../../lib/session";
+import { storage } from "../../lib/firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { compressImage } from "../../lib/imageCompression";
 
 export const getServerSideProps = withSessionSsr(async ({ req, params }) => {
   if (!req.session?.userId) {
@@ -18,7 +21,8 @@ export const getServerSideProps = withSessionSsr(async ({ req, params }) => {
   const slug = params.productId;
   await connectDB();
   const product = await fetchProductBySlug(slug);
-  if (!product) {
+  const isAvailable = product && (!product.status || product.status === "available");
+  if (!product || !isAvailable) {
     return { notFound: true };
   }
 
@@ -51,8 +55,8 @@ export default function ProductDetail({
   const [message, setMessage] = useState({ text: "", isError: false });
   const [showEdit, setShowEdit] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
-  const [cartQty, setCartQty] = useState(1);
   const [navCount, setNavCount] = useState(count);
+  const [editImageFiles, setEditImageFiles] = useState([]);
   const [editForm, setEditForm] = useState({
     name: productState.name,
     price: productState.price,
@@ -62,6 +66,15 @@ export default function ProductDetail({
     image: productState.image,
     specs: productState.specs.join("\n"),
   });
+  const uniqueSpecs = useMemo(() => {
+    const seen = new Set();
+    return productState.specs.filter((spec) => {
+      const key = (spec || "").toLowerCase().trim();
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, [productState.specs]);
 
   const handleAddToCart = async (event) => {
     event.preventDefault();
@@ -72,14 +85,13 @@ export default function ProductDetail({
         body: JSON.stringify({
           action: "add",
           productId: productState.id,
-          quantity: cartQty,
         }),
       });
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.message || "Unable to add to cart.");
       }
-      setNavCount((value) => value + (parseInt(cartQty, 10) || 1));
+      setNavCount((value) => value + 1);
       setMessage({ text: "Added to cart.", isError: false });
     } catch (error) {
       setMessage({ text: error.message, isError: true });
@@ -89,11 +101,35 @@ export default function ProductDetail({
   const handleUpdate = async (event) => {
     event.preventDefault();
     setMessage({ text: "", isError: false });
+    let uploadedImages = [];
+    if (editImageFiles.length > 5) {
+      setMessage({ text: "Please upload 5 images or fewer.", isError: true });
+      return;
+    }
+    if (editImageFiles.length) {
+      try {
+        uploadedImages = [];
+        for (const file of editImageFiles) {
+          const compressed = await compressImage(file);
+          const storageRef = ref(storage, `listings/${Date.now()}-${file.name}`);
+          await uploadBytes(storageRef, compressed);
+          const url = await getDownloadURL(storageRef);
+          uploadedImages.push(url);
+        }
+      } catch (error) {
+        setMessage({ text: "Image upload failed. Try again.", isError: true });
+        return;
+      }
+    }
+
     try {
       const res = await fetch(`/api/products/${productState.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editForm),
+        body: JSON.stringify({
+          ...editForm,
+          ...(uploadedImages.length ? { images: uploadedImages } : {}),
+        }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -157,7 +193,10 @@ export default function ProductDetail({
         <div className="grid gap-6 lg:grid-cols-2 stagger-children">
           <div className="card overflow-hidden">
             <img
-              src={productState.image}
+              src={
+                (productState.images && productState.images[0]) ||
+                productState.image
+              }
               alt={productState.name}
               className="h-full w-full object-cover"
             />
@@ -169,23 +208,13 @@ export default function ProductDetail({
             </div>
             <p className="text-slate-700">{productState.description}</p>
             <div className="flex flex-wrap gap-2">
-              {productState.specs.map((spec) => (
+              {uniqueSpecs.map((spec) => (
                 <span key={spec} className="pill">
                   {spec}
                 </span>
               ))}
             </div>
             <form className="space-y-3" onSubmit={handleAddToCart}>
-              <label className="label flex items-center gap-3">
-                Quantity
-                <input
-                  className="input w-24"
-                  type="number"
-                  min="1"
-                  value={cartQty}
-                  onChange={(e) => setCartQty(e.target.value)}
-                />
-              </label>
               <button type="submit" className="btn-primary w-full">
                 Add to Cart - ${productState.price.toFixed(2)}
               </button>
@@ -267,7 +296,7 @@ export default function ProductDetail({
                     />
                   </label>
                   <label className="label">
-                    Image URL
+                    Image URL (fallback/primary)
                     <input
                       className="input mt-1"
                       type="url"
@@ -278,6 +307,21 @@ export default function ProductDetail({
                         setEditForm({ ...editForm, image: e.target.value })
                       }
                     />
+                  </label>
+                  <label className="label">
+                    Upload new photos (optional)
+                    <input
+                      className="input mt-1"
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={(e) =>
+                        setEditImageFiles(Array.from(e.target.files || []))
+                      }
+                    />
+                    <p className="text-xs text-slate-500">
+                      Uploading replaces images if provided; first photo becomes the cover.
+                    </p>
                   </label>
                 </div>
                 <div className="space-y-3">

@@ -7,6 +7,9 @@ import { cartCount, getCartSnapshot } from "../../lib/cart";
 import connectDB from "../../lib/db";
 import { fetchProducts } from "../../lib/products";
 import { withSessionSsr } from "../../lib/session";
+import { storage } from "../../lib/firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { compressImage } from "../../lib/imageCompression";
 
 export const getServerSideProps = withSessionSsr(async ({ req }) => {
   if (!req.session?.userId) {
@@ -42,7 +45,8 @@ export default function Products({ products, currentUser, cartCount: count }) {
     condition: "",
     authors: "",
   });
-  const [quantities, setQuantities] = useState({});
+  const [imageFiles, setImageFiles] = useState([]);
+  const [uploadingImages, setUploadingImages] = useState(false);
   const [generating, setGenerating] = useState(false);
   const priceLabels = useMemo(
     () =>
@@ -71,12 +75,39 @@ export default function Products({ products, currentUser, cartCount: count }) {
     event.preventDefault();
     setBanner({ message: "", isError: false });
     setGenerating(true);
+    setUploadingImages(true);
+    if (imageFiles.length > 5) {
+      setBanner({ message: "Please upload 5 images or fewer.", isError: true });
+      setGenerating(false);
+      setUploadingImages(false);
+      return;
+    }
+    let uploadedImages = [];
+    if (imageFiles.length) {
+      try {
+        uploadedImages = [];
+        for (const file of imageFiles) {
+          const compressed = await compressImage(file);
+          const storageRef = ref(storage, `listings/${Date.now()}-${file.name}`);
+          await uploadBytes(storageRef, compressed);
+          const url = await getDownloadURL(storageRef);
+          uploadedImages.push(url);
+        }
+      } catch (error) {
+        setBanner({ message: "Image upload failed. Try again.", isError: true });
+        setGenerating(false);
+        setUploadingImages(false);
+        return;
+      }
+    }
+    setUploadingImages(false);
     const payload = {
       title: form.title.trim(),
       edition: form.edition.trim(),
       price: form.price,
       condition: form.condition.trim(),
       authors: form.authors.trim(),
+      images: uploadedImages,
     };
     try {
       const res = await fetch("/api/products/generate", {
@@ -97,6 +128,7 @@ export default function Products({ products, currentUser, cartCount: count }) {
         condition: "",
         authors: "",
       });
+      setImageFiles([]);
       router.replace(router.asPath);
     } catch (error) {
       setBanner({ message: error.message, isError: true });
@@ -104,10 +136,6 @@ export default function Products({ products, currentUser, cartCount: count }) {
     } finally {
       setGenerating(false);
     }
-  };
-
-  const handleQuantityChange = (id, value) => {
-    setQuantities((prev) => ({ ...prev, [id]: value }));
   };
 
   return (
@@ -169,7 +197,7 @@ export default function Products({ products, currentUser, cartCount: count }) {
                 <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 rounded-3xl bg-white/70 backdrop-blur-sm">
                   <div className="h-10 w-10 animate-spin rounded-full border-4 border-sky-200 border-t-sky-600" />
                   <p className="text-sm font-semibold text-slate-800">
-                    Generating listing with OpenAI…
+                    {uploadingImages ? "Uploading photos…" : "Generating listing with OpenAI…"}
                   </p>
                 </div>
               )}
@@ -192,12 +220,12 @@ export default function Products({ products, currentUser, cartCount: count }) {
                     />
                   </label>
                   <label className="label">
-                    Edition *
+                    Edition
                     <input
                       className="input mt-1"
                       type="text"
                       name="edition"
-                      required
+                      placeholder="e.g., 3rd, 2021 printing (optional)"
                       value={form.edition}
                       onChange={(e) =>
                         setForm({ ...form, edition: e.target.value })
@@ -247,6 +275,22 @@ export default function Products({ products, currentUser, cartCount: count }) {
                       }
                     />
                   </label>
+                  <label className="label">
+                    Photos (optional)
+                    <input
+                      className="input mt-1"
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={(e) => setImageFiles(Array.from(e.target.files || []))}
+                    />
+                    <p className="text-xs text-slate-500">
+                      Upload multiple images; first image becomes the cover. If none are uploaded, a cover will be generated.
+                    </p>
+                    {imageFiles.length > 0 && (
+                      <p className="text-xs text-slate-600">{imageFiles.length} file(s) selected.</p>
+                    )}
+                  </label>
                   <div className="flex flex-wrap gap-2 pt-2">
                     <button type="submit" className="btn-primary">
                       Generate listing
@@ -267,7 +311,6 @@ export default function Products({ products, currentUser, cartCount: count }) {
 
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 stagger-children">
           {filteredProducts.map((product) => {
-            const qty = quantities[product.id] || 1;
             return (
               <div className="card flex h-full flex-col" key={product.id}>
                 <a
@@ -275,7 +318,11 @@ export default function Products({ products, currentUser, cartCount: count }) {
                   href={`/products/${product.id}`}
                 >
                   <img
-                    src={product.image}
+                    src={
+                      Array.isArray(product.images) && product.images.length
+                        ? product.images[0]
+                        : product.image
+                    }
                     alt={product.name}
                     className="h-full w-full object-cover transition duration-300 hover:scale-105"
                     loading="lazy"
@@ -301,21 +348,8 @@ export default function Products({ products, currentUser, cartCount: count }) {
                     ))}
                   </div>
                   <div className="mt-auto space-y-2">
-                    <label className="label flex items-center gap-2">
-                      Qty
-                      <input
-                        className="input w-20"
-                        type="number"
-                        min="1"
-                        value={qty}
-                        onChange={(e) =>
-                          handleQuantityChange(product.id, e.target.value)
-                        }
-                      />
-                    </label>
                     <AddToCartButton
                       productId={product.id}
-                      quantity={qty}
                       redirect="/products"
                     >
                       Add to Cart - ${priceLabels[product.id]}

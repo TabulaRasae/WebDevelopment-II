@@ -51,6 +51,7 @@ async function productRoute(req, res) {
       description,
       headline,
       image,
+      images,
       specs,
     } = req.body || {};
 
@@ -60,7 +61,7 @@ async function productRoute(req, res) {
       !shortDescription ||
       !description ||
       !headline ||
-      !image
+      !(image || (Array.isArray(images) && images.length))
     ) {
       return res.status(400).json({
         message: "All fields are required to update this listing.",
@@ -74,13 +75,17 @@ async function productRoute(req, res) {
       });
     }
 
+    const imagesArray = Array.isArray(images) ? images.filter(Boolean) : [];
+    const primaryImage = imagesArray[0] || image?.trim();
+
     const updated = await updateProduct(slug, {
       name: name.trim(),
       price: priceNumber,
       shortDescription: shortDescription.trim(),
       description: description.trim(),
       headline: headline.trim(),
-      image: image.trim(),
+      image: primaryImage,
+      ...(imagesArray.length ? { images: imagesArray } : {}),
       specs: parseSpecs(specs),
     });
 

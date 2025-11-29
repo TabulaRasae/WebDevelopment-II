@@ -132,7 +132,7 @@ export default function Cart({
                   key={item.productId}
                   className="card card-lift flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between"
                 >
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <Link
                       href={`/products/${item.productId}`}
                       className="text-lg font-semibold text-slate-900 leading-tight line-clamp-2"
@@ -143,33 +143,13 @@ export default function Cart({
                       ${item.price.toFixed(2)} each
                     </p>
                   </div>
-                  <div className="flex flex-wrap items-center gap-3">
-                    <form
-                      className="flex items-center gap-2"
-                      onSubmit={(e) => {
-                        e.preventDefault();
-                        const qty = e.target.quantity.value;
-                        handleUpdate(item.productId, qty);
-                      }}
-                    >
-                      <input type="hidden" name="productId" value={item.productId} />
-                      <input
-                        className="input w-24"
-                        type="number"
-                        name="quantity"
-                        min="0"
-                        defaultValue={item.quantity}
-                      />
-                      <button type="submit" className="btn-ghost">
-                        Update
-                      </button>
-                    </form>
-                    <p className="font-semibold text-slate-900">
-                      ${(item.price * item.quantity).toFixed(2)}
+                  <div className="flex flex-wrap items-center gap-3 sm:flex-nowrap sm:justify-end">
+                    <p className="font-semibold text-slate-900 whitespace-nowrap">
+                      ${item.price.toFixed(2)}
                     </p>
                     <button
                       type="button"
-                      className="btn-ghost border-red-500/50 text-red-700 hover:bg-red-50"
+                      className="btn-ghost border-red-500/50 text-red-700 hover:bg-red-50 whitespace-nowrap"
                       onClick={() => handleRemove(item.productId)}
                     >
                       Remove
