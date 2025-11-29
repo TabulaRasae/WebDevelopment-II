@@ -8,7 +8,7 @@ import connectDB from "../../lib/db";
 import { fetchProductBySlug } from "../../lib/products";
 import { withSessionSsr } from "../../lib/session";
 import { storage } from "../../lib/firebase";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { compressImage } from "../../lib/imageCompression";
 
 export const getServerSideProps = withSessionSsr(async ({ req, params }) => {
@@ -112,12 +112,32 @@ export default function ProductDetail({
         for (const file of editImageFiles) {
           const compressed = await compressImage(file);
           const storageRef = ref(storage, `listings/${Date.now()}-${file.name}`);
-          await uploadBytes(storageRef, compressed);
+          const uploadTask = uploadBytesResumable(storageRef, compressed);
+
+          await new Promise((resolve, reject) => {
+            uploadTask.on(
+              "state_changed",
+              () => {},
+              (error) => {
+                console.error("Image upload failed", {
+                  file: file.name,
+                  code: error.code,
+                  message: error.message,
+                });
+                reject(error);
+              },
+              () => resolve()
+            );
+          });
+
           const url = await getDownloadURL(storageRef);
           uploadedImages.push(url);
         }
       } catch (error) {
-        setMessage({ text: "Image upload failed. Try again.", isError: true });
+        setMessage({
+          text: `Image upload failed: ${error?.code || error?.message || "Unknown error"}`,
+          isError: true,
+        });
         return;
       }
     }
