@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import connectDB from "../../../lib/db";
 import { withSessionRoute } from "../../../lib/session";
 import User from "../../../database/models/User";
+import { withCors } from "../../../lib/cors";
 
 async function registerRoute(req, res) {
   if (req.method !== "POST") {
@@ -33,4 +34,4 @@ async function registerRoute(req, res) {
   });
 }
 
-export default withSessionRoute(registerRoute);
+export default withCors(withSessionRoute(registerRoute));

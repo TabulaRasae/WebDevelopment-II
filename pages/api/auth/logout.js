@@ -1,4 +1,5 @@
 import { withSessionRoute } from "../../../lib/session";
+import { withCors } from "../../../lib/cors";
 
 async function logoutRoute(req, res) {
   if (req.method !== "POST") {
@@ -9,4 +10,4 @@ async function logoutRoute(req, res) {
   return res.status(200).json({ ok: true });
 }
 
-export default withSessionRoute(logoutRoute);
+export default withCors(withSessionRoute(logoutRoute));

@@ -6,6 +6,7 @@ import {
   updateProduct,
 } from "../../../lib/products";
 import { getUserId, withSessionRoute } from "../../../lib/session";
+import { withCors } from "../../../lib/cors";
 
 async function productRoute(req, res) {
   const { slug } = req.query;
@@ -100,4 +101,4 @@ async function productRoute(req, res) {
   return res.status(405).json({ message: "Method not allowed" });
 }
 
-export default withSessionRoute(productRoute);
+export default withCors(withSessionRoute(productRoute));

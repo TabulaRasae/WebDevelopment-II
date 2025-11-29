@@ -7,6 +7,7 @@ import {
   sanitizeCoverImage,
   validateImageUrl,
 } from "../../../lib/coverSelection.js";
+import { withCors } from "../../../lib/cors";
 
 const OPENAI_MODEL =
   process.env.OPENAI_MODEL ||
@@ -292,7 +293,7 @@ async function generateRoute(req, res) {
         .join(" ");
     const description = ensureCourseAndIsbn(baseDescription, title, derivedIsbn);
 
-    const providedImageList = providedImages.map((u) => sanitizeCoverImage(u));
+    const providedImageList = providedImages.map((u) => sanitizeCoverImage(u)).filter(Boolean);
     const candidates = [
       ...providedImageList.map((url) => ({ label: "user", url })),
       { label: "google", url: googleImage },
@@ -300,8 +301,6 @@ async function generateRoute(req, res) {
       { label: "openSearch", url: openSearch.image },
       { label: "ai", url: aiImage },
     ];
-
-    const providedImageList = providedImages.map((u) => sanitizeCoverImage(u)).filter(Boolean);
     let image = "";
     for (const { url } of candidates) {
       const valid = await validateImageUrl(url);
@@ -369,4 +368,4 @@ async function generateRoute(req, res) {
   }
 }
 
-export default withSessionRoute(generateRoute);
+export default withCors(withSessionRoute(generateRoute));

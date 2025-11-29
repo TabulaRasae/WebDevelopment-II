@@ -5,6 +5,7 @@ import { getUserId, withSessionRoute } from "../../../lib/session";
 import Cart from "../../../database/models/Cart";
 import Order from "../../../database/models/Order";
 import Product from "../../../database/models/Product";
+import { withCors } from "../../../lib/cors";
 
 async function cartRoute(req, res) {
   const userId = getUserId(req);
@@ -142,4 +143,4 @@ async function cartRoute(req, res) {
   return res.status(405).json({ message: "Unsupported action." });
 }
 
-export default withSessionRoute(cartRoute);
+export default withCors(withSessionRoute(cartRoute));

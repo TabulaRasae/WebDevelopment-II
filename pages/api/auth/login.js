@@ -3,6 +3,7 @@ import connectDB from "../../../lib/db";
 import { getCartForUser } from "../../../lib/cart";
 import { withSessionRoute } from "../../../lib/session";
 import User from "../../../database/models/User";
+import { withCors } from "../../../lib/cors";
 
 async function loginRoute(req, res) {
   if (req.method !== "POST") {
@@ -30,4 +31,4 @@ async function loginRoute(req, res) {
   return res.status(200).json({ ok: true, userId: user.userid });
 }
 
-export default withSessionRoute(loginRoute);
+export default withCors(withSessionRoute(loginRoute));

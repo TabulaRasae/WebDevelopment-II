@@ -1,10 +1,7 @@
 import connectDB from "../../../lib/db";
-import {
-  createProduct,
-  fetchProducts,
-  parseSpecs,
-} from "../../../lib/products";
+import { createProduct, fetchProducts, parseSpecs } from "../../../lib/products";
 import { getUserId, withSessionRoute } from "../../../lib/session";
+import { withCors } from "../../../lib/cors";
 
 async function productsRoute(req, res) {
   if (req.method === "GET") {
@@ -66,4 +63,4 @@ async function productsRoute(req, res) {
   return res.status(405).json({ message: "Method not allowed" });
 }
 
-export default withSessionRoute(productsRoute);
+export default withCors(withSessionRoute(productsRoute));
